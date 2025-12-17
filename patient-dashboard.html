@@ -2095,6 +2095,12 @@
                     </div>
                 </div>
 
+                <!-- ORGAN SELECTOR TRAY -->
+                <div class="organ-tray"
+                    style="display:flex; gap:12px; margin-bottom:20px; overflow-x:auto; padding:10px 0;">
+                    <!-- Populated by renderOrganTray() -->
+                </div>
+
                 <div class="heart-stage">
                     <div class="rings"></div>
                     <div class="scanner-line"></div>
@@ -3411,6 +3417,60 @@
                 }
             );
         }
+
+        // --- RENDER ORGAN SELECTOR TRAY ---
+        function renderOrganTray() {
+            const tray = document.querySelector('.organ-tray');
+            if (!tray || !window.PATIENT_OS) return;
+
+            tray.innerHTML = '';
+            const organs = window.PATIENT_OS.organs;
+
+            Object.keys(organs).forEach((key, index) => {
+                const organ = organs[key];
+                const btn = document.createElement('button');
+                btn.className = 'organ-item' + (index === 0 ? ' selected' : '');
+                btn.dataset.organ = key;
+                btn.style.cssText = `
+                    background: var(--card-bg);
+                    border: 2px solid var(--card-border);
+                    border-radius: 16px;
+                    padding: 16px 20px;
+                    min-width: 140px;
+                    cursor: pointer;
+                    transition: all 0.3s;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 8px;
+                `;
+
+                btn.innerHTML = `
+                    <i class="ph-fill ${organ.icon}" style="font-size: 28px; color: var(--color-blue);"></i>
+                    <div style="font-size: 13px; font-weight: 700; color: var(--text-main); text-align: center;">${organ.title}</div>
+                    <div style="font-size: 11px; color: var(--text-muted);">${organ.simValue}%</div>
+                `;
+
+                // Hover effect
+                btn.addEventListener('mouseenter', () => {
+                    if (!btn.classList.contains('selected')) {
+                        btn.style.borderColor = 'var(--color-blue)';
+                        btn.style.background = 'rgba(10, 132, 255, 0.1)';
+                    }
+                });
+                btn.addEventListener('mouseleave', () => {
+                    if (!btn.classList.contains('selected')) {
+                        btn.style.borderColor = 'var(--card-border)';
+                        btn.style.background = 'var(--card-bg)';
+                    }
+                });
+
+                tray.appendChild(btn);
+            });
+
+            console.log('✅ Organ tray rendered with', Object.keys(organs).length, 'organs');
+        }
+
 
         // --- UPDATE UI WITH VITALS ---
         function updateUI(organKey) {
