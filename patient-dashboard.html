@@ -20,6 +20,9 @@
     <script src="js/patient-os.js"></script>
     <script src="js/localization.js"></script>
 
+    <!-- Responsive Design -->
+    <link rel="stylesheet" href="css/responsive.css">
+
     <style>
         /* --- CORE THEME VARIABLES --- */
         :root {
@@ -3352,6 +3355,12 @@
             hydrateSync();
 
             renderFamilyCards('dashboard-family-grid', getFamilyList().slice(0, 3));
+
+            // Start Live Vitals Simulation
+            if (window.PATIENT_OS && window.PATIENT_OS.utils) {
+                window.PATIENT_OS.utils.simulateVitals();
+                console.log('✅ Live vitals simulation started');
+            }
 
             // Event Delegation for Organ Clicks
             document.querySelector('.organ-tray').addEventListener('click', (e) => {

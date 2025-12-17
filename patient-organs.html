@@ -1111,9 +1111,18 @@
             </div>
 
             <div class="detail-model-view">
-                <!-- Fallback to generic model if organ model not specific -->
-                <model-viewer src="https://modelviewer.dev/shared-assets/models/Astronaut.glb" camera-controls auto-rotate style="width:100%; height:100%;"></model-viewer>
-                <div style="position:absolute; bottom:16px; left:16px; font-size:11px; background:rgba(0,0,0,0.5); padding:4px 8px; border-radius:8px;">Live Twin Simulation</div>
+                <!-- Dynamically load specific organ model or fallback -->
+                <model-viewer 
+                    src="${organ.modelPath ? '3d_models/' + organ.modelPath + '.glb' : 'https://modelviewer.dev/shared-assets/models/Astronaut.glb'}" 
+                    camera-controls 
+                    auto-rotate 
+                    shadow-intensity="1"
+                    style="width:100%; height:100%;"
+                    alt="${organ.title} 3D Model">
+                </model-viewer>
+                <div style="position:absolute; bottom:16px; left:16px; font-size:11px; background:rgba(0,0,0,0.5); padding:4px 8px; border-radius:8px;">
+                    ${organ.modelPath ? 'Live Organ Twin' : 'Generic Simulation Model'}
+                </div>
             </div>
 
             <div class="data-grid">

@@ -1275,197 +1275,274 @@
           <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px;">
             <div><strong style="color: var(--text-main);">72.4 kg</strong><br><small>Weight</small></div>
             <div><strong style="color: var(--text-main);">176 cm</strong><br><small>Height</small></div>
-            <div><strong style="color: var(--text-main);">23.3</strong><br><small>BMI (Healthy)</small></div>
-          </div>
-        </div>
-        <div class="tile">
-          <p class="vital-label" style="margin: 0;">Allergies & Blood Group</p>
-          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 12px;">
-            <div class="med-pill-item" style="--pill-color:#f59e0b; --pill-color-dark:#b45309;">
-              <div class="pill-icon">🥜</div>
-              <div class="med-info">
-                <div class="med-name" style="color: white;">Peanut allergy</div>
-                <div class="med-dosage">Carry epinephrine</div>
+            <!-- HERO SCORE SECTION -->
+            <div class="health-hero"
+              style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.05); padding:24px; border-radius:16px; margin-bottom:24px; backdrop-filter:blur(10px);">
+              <div>
+                <div style="font-size:14px; opacity:0.7; margin-bottom:4px;" data-i18n="health_score_title">Overall
+                  Health Score</div>
+                <div style="font-size:48px; font-weight:800; color:var(--color-green);">92<span
+                    style="font-size:24px;">/100</span></div>
+                <div class="pill success" style="margin-top:8px;">Optimal Condition</div>
+              </div>
+              <div style="text-align:right;">
+                <div class="ai-badge"
+                  style="background:rgba(10,132,255,0.1); padding:8px 16px; border-radius:30px; border:1px solid rgba(10,132,255,0.3); display:inline-flex; align-items:center; gap:8px;">
+                  <i class="ph-fill ph-sparkle" style="color:#0A84FF;"></i>
+                  <span style="font-size:13px; font-weight:600; color:#0A84FF;">AI Analysis Active</span>
+                </div>
+                <p style="margin-top:8px; font-size:12px; max-width:250px; opacity:0.8; line-height:1.4;">
+                  Vital stable. Kidney function improved by 2% since last week.
+                </p>
               </div>
             </div>
-            <div class="med-pill-item" style="--pill-color:#ef4444; --pill-color-dark:#b91c1c;">
-              <div class="pill-icon">💊</div>
-              <div class="med-info">
-                <div class="med-name" style="color: white;">Penicillin sensitivity</div>
-                <div class="med-dosage">Flagged</div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="tile">
-          <p class="vital-label" style="margin: 0;">History & Confidential Notes</p>
-          <ul style="margin: 10px 0 0 18px; line-height: 1.5; color: var(--text-main);">
-            <li>Past medical: Mild asthma (childhood), GERD</li>
-            <li>Past surgical: Appendectomy (2015)</li>
-          </ul>
-        </div>
-        <div class="section-title"><i class="ph-fill ph-dna"></i> Genetics & Nutrition</div>
-        <div class="mini-grid">
-          <div class="tile">
-            <p class="vital-label" style="margin: 0;">Genetic Profile</p>
-            <div style="margin-top:10px;">
-              <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px;">
-                <span>Metabolism Type</span>
-                <strong style="color:white;">Fast Oxidizer</strong>
-              </div>
-              <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px;">
-                <span>Carb Sensitivity</span>
-                <strong style="color:var(--color-yellow);">Moderate</strong>
-              </div>
-              <div style="display:flex; justify-content:space-between; font-size:13px;">
-                <span>Caffeine</span>
-                <strong style="color:var(--color-green);">Fast metabolizer</strong>
-              </div>
-            </div>
-          </div>
-          <div class="tile">
-            <p class="vital-label" style="margin: 0;">Nutritional Deficiencies</p>
-            <div style="margin-top:10px; display:flex; flex-wrap:wrap; gap:8px;">
-              <span class="med-pill-item"
-                style="padding:4px 10px; font-size:12px; margin:0; --pill-color:#ef4444; --pill-color-dark:#b91c1c;">
-                <span style="color:white; margin-right:4px;">Vitamin D3</span> <small style="opacity:0.7;">Low</small>
-              </span>
-              <span class="med-pill-item"
-                style="padding:4px 10px; font-size:12px; margin:0; --pill-color:#f59e0b; --pill-color-dark:#b45309;">
-                <span style="color:white; margin-right:4px;">Magnesium</span> <small
-                  style="opacity:0.7;">Borderline</small>
-              </span>
-            </div>
-          </div>
-          <div class="tile">
-            <p class="vital-label" style="margin: 0;">Dietary Plan</p>
-            <div style="margin-top:10px;">
-              <h4 style="color:var(--color-blue); margin-bottom:4px;">Mediterranean (Modified)</h4>
-              <p style="font-size:12px; opacity:0.7; line-height:1.4;">High healthy fats, moderate protein. Focus on
-                leafy greens and omega-3s.</p>
-            </div>
-          </div>
-        </div>
 
-        <div class="section-title"><i class="ph-fill ph-chart-line"></i> Health Trends</div>
-        <div class="chart-card">
-          <div class="chart-header">
-            <div class="chart-title">7-Day Vitals Overview</div>
-            <div class="chart-tabs">
-              <button class="chart-tab active" onclick="switchChart('week')">Week</button>
-              <button class="chart-tab" onclick="switchChart('month')">Month</button>
-              <button class="chart-tab" onclick="switchChart('year')">Year</button>
+            <!-- LIVE VITALS GRID -->
+            <div class="section-title"><i class="ph-fill ph-activity"></i> <span data-i18n="health_vitals_title">Live
+                Vitals</span></div>
+            <div class="vitals-grid" id="vitals-grid">
+              <!-- Heart -->
+              <div class="vital-card">
+                <div class="vital-icon" style="background:rgba(239, 68, 68, 0.2); color:#ef4444;"><i
+                    class="ph-fill ph-heart"></i></div>
+                <div>
+                  <div class="vital-label">Heart Rate</div>
+                  <div class="vital-val" id="val-hr">72 <small>bpm</small></div>
+                  <div class="vital-trend up">+2%</div>
+                </div>
+                <div class="mini-chart" id="chart-hr"></div>
+              </div>
+              <!-- BP -->
+              <div class="vital-card">
+                <div class="vital-icon" style="background:rgba(16, 185, 129, 0.2); color:#10b981;"><i
+                    class="ph-fill ph-drop"></i></div>
+                <div>
+                  <div class="vital-label">Blood Pressure</div>
+                  <div class="vital-val" id="val-bp">118/74</div>
+                  <div class="vital-trend down">-1%</div>
+                </div>
+                <div class="mini-chart" id="chart-bp"></div>
+              </div>
+              <!-- SpO2 -->
+              <div class="vital-card">
+                <div class="vital-icon" style="background:rgba(59, 130, 246, 0.2); color:#3b82f6;"><i
+                    class="ph-fill ph-wind"></i></div>
+                <div>
+                  <div class="vital-label">O2 Saturation</div>
+                  <div class="vital-val" id="val-spo2">98 <small>%</small></div>
+                  <div class="vital-trend flat">0%</div>
+                </div>
+                <div class="mini-chart" id="chart-spo2"></div>
+              </div>
+              <!-- Resp -->
+              <div class="vital-card">
+                <div class="vital-icon" style="background:rgba(245, 158, 11, 0.2); color:#f59e0b;"><i
+                    class="ph-fill ph-lungs"></i></div>
+                <div>
+                  <div class="vital-label">Resp. Rate</div>
+                  <div class="vital-val" id="val-resp">16 <small>rpm</small></div>
+                  <div class="vital-trend up">+1%</div>
+                </div>
+                <div class="mini-chart" id="chart-resp"></div>
+              </div>
+            </div>
+
+            <!-- TABS SECTION -->
+            <div class="tab-container" style="margin-top:30px;">
+              <div class="tabs-header"
+                style="display:flex; gap:20px; border-bottom:1px solid rgba(255,255,255,0.1); margin-bottom:20px;">
+                <button class="tab-btn active" onclick="switchTab('organs')"
+                  style="background:none; border:none; color:white; padding:10px 0; border-bottom:2px solid var(--color-blue); font-weight:600; cursor:pointer;">Organ
+                  Systems</button>
+                <button class="tab-btn" onclick="switchTab('genetics')"
+                  style="background:none; border:none; color:var(--text-muted); padding:10px 0; border-bottom:2px solid transparent; font-weight:600; cursor:pointer;">Genetics
+                  & Nutrition</button>
+                <button class="tab-btn" onclick="switchTab('trends')"
+                  style="background:none; border:none; color:var(--text-muted); padding:10px 0; border-bottom:2px solid transparent; font-weight:600; cursor:pointer;">Trends</button>
+              </div>
+
+              <!-- ORGANS TAB -->
+              <div id="tab-organs" class="tab-content" style="display:block;">
+                <div id="health-organ-grid"
+                  style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:16px;">
+                  <!-- Rendered via JS -->
+                </div>
+              </div>
+
+              <!-- GENETICS TAB -->
+              <div id="tab-genetics" class="tab-content" style="display:none;">
+                <div class="mini-grid"
+                  style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:20px;">
+                  <div class="tile">
+                    <p class="vital-label" style="margin: 0;">Genetic Profile</p>
+                    <div style="margin-top:10px;">
+                      <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px;">
+                        <span>Metabolism Type</span>
+                        <strong style="color:white;">Fast Oxidizer</strong>
+                      </div>
+                      <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px;">
+                        <span>Carb Sensitivity</span>
+                        <strong style="color:var(--color-yellow);">Moderate</strong>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="tile">
+                    <p class="vital-label" style="margin: 0;">Nutritional Deficiencies</p>
+                    <div style="margin-top:10px; display:flex; flex-wrap:wrap; gap:8px;">
+                      <span class="med-pill-item"
+                        style="padding:4px 10px; font-size:12px; margin:0; --pill-color:#ef4444; --pill-color-dark:#b91c1c;">
+                        <span style="color:white; margin-right:4px;">Vitamin D3</span> <small
+                          style="opacity:0.7;">Low</small>
+                      </span>
+                    </div>
+                  </div>
+                  <div class="tile">
+                    <p class="vital-label" style="margin: 0;">Dietary Plan</p>
+                    <div style="margin-top:10px;">
+                      <h4 style="color:var(--color-blue); margin-bottom:4px;">Mediterranean (Modified)</h4>
+                      <p style="font-size:12px; opacity:0.7; line-height:1.4;">High healthy fats, moderate protein.
+                        Focus on leafy greens and omega-3s.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- TRENDS TAB -->
+              <div id="tab-trends" class="tab-content" style="display:none;">
+                <div class="tile">
+                  <p class="vital-label">30-Day Health Trend</p>
+                  <div style="height:150px; display:flex; align-items:flex-end; gap:8px; padding-top:20px;">
+                    <!-- Mock Chart Bars -->
+                    <div style="flex:1; background:rgba(255,255,255,0.1); height:40%; border-radius:4px;"></div>
+                    <div style="flex:1; background:rgba(255,255,255,0.1); height:60%; border-radius:4px;"></div>
+                    <div style="flex:1; background:rgba(255,255,255,0.1); height:55%; border-radius:4px;"></div>
+                    <div style="flex:1; background:rgba(255,255,255,0.1); height:70%; border-radius:4px;"></div>
+                    <div style="flex:1; background:var(--color-blue); height:85%; border-radius:4px;"></div>
+                    <div style="flex:1; background:rgba(255,255,255,0.1); height:80%; border-radius:4px;"></div>
+                    <div style="flex:1; background:rgba(255,255,255,0.1); height:92%; border-radius:4px;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <script>
+              function switchTab(tabId) {
+                document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+                document.getElementById('tab-' + tabId).style.display = 'block';
+
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                  btn.style.color = 'var(--text-muted)';
+                  btn.style.borderBottom = '2px solid transparent';
+                  btn.classList.remove('active');
+                });
+                event.target.style.color = 'white';
+                event.target.style.borderBottom = '2px solid var(--color-blue)';
+                event.target.classList.add('active');
+              }
+            </script>class="med-shell med-section">
+            <div class="med-hero">
+              <div>
+                <h3>Pharmacy Hub Preview</h3>
+                <p>Track doses, refill stock, and sync orders directly to the Pharmacy OS.</p>
+              </div>
+              <div class="actions">
+                <a class="pill primary-link" href="patient-pharmacy.html?from=health" id="open-pharmacy-link"><i
+                    class="ph-bold ph-shopping-cart"></i> Order via Pharmacy</a>
+              </div>
+            </div>
+            <div class="mini-grid">
+              <div class="tile">
+                <p class="vital-label">Today</p><strong>Medication Timeline</strong>
+                <div class="timeline-lite" id="timeline"></div>
+              </div>
+              <div class="tile">
+                <p class="vital-label">Active</p><strong>Medications & Stock</strong>
+                <div id="meds-grid" style="display: grid; grid-template-columns: 1fr; gap: 12px;"></div>
+              </div>
             </div>
           </div>
-          <canvas id="trend-chart" height="80"></canvas>
-        </div>
 
-        <!-- Reuse rest of content structure for Risk, Meds, Actions... -->
-        <div class="section-title"><i class="ph-fill ph-pill"></i> Medication Management</div>
-        <div class="med-shell med-section">
-          <div class="med-hero">
-            <div>
-              <h3>Pharmacy Hub Preview</h3>
-              <p>Track doses, refill stock, and sync orders directly to the Pharmacy OS.</p>
-            </div>
-            <div class="actions">
-              <a class="pill primary-link" href="patient-pharmacy.html?from=health" id="open-pharmacy-link"><i
-                  class="ph-bold ph-shopping-cart"></i> Order via Pharmacy</a>
-            </div>
+          <div class="section-title" style="margin-top: 32px;"><i class="ph-fill ph-lightning"></i> Quick Actions</div>
+          <div class="quick-actions">
+            <a href="patient-labs.html" class="action-btn">
+              <div class="action-icon"><i class="ph-bold ph-upload-simple"></i></div>
+              <div class="action-text"><strong>Upload Lab Results</strong><small>PDF, JPG supported</small></div>
+            </a>
+            <a href="patient-organs.html" class="action-btn">
+              <div class="action-icon"><i class="ph-bold ph-scan"></i></div>
+              <div class="action-text"><strong>Organ Health Check</strong><small>Full body scan</small></div>
+            </a>
+            <a href="patient-hospitals.html" class="action-btn">
+              <div class="action-icon"><i class="ph-bold ph-calendar-plus"></i></div>
+              <div class="action-text"><strong>Book Appointment</strong><small>Find nearby</small></div>
+            </a>
           </div>
-          <div class="mini-grid">
-            <div class="tile">
-              <p class="vital-label">Today</p><strong>Medication Timeline</strong>
-              <div class="timeline-lite" id="timeline"></div>
-            </div>
-            <div class="tile">
-              <p class="vital-label">Active</p><strong>Medications & Stock</strong>
-              <div id="meds-grid" style="display: grid; grid-template-columns: 1fr; gap: 12px;"></div>
-            </div>
-          </div>
-        </div>
 
-        <div class="section-title" style="margin-top: 32px;"><i class="ph-fill ph-lightning"></i> Quick Actions</div>
-        <div class="quick-actions">
-          <a href="patient-labs.html" class="action-btn">
-            <div class="action-icon"><i class="ph-bold ph-upload-simple"></i></div>
-            <div class="action-text"><strong>Upload Lab Results</strong><small>PDF, JPG supported</small></div>
-          </a>
-          <a href="patient-organs.html" class="action-btn">
-            <div class="action-icon"><i class="ph-bold ph-scan"></i></div>
-            <div class="action-text"><strong>Organ Health Check</strong><small>Full body scan</small></div>
-          </a>
-          <a href="patient-hospitals.html" class="action-btn">
-            <div class="action-icon"><i class="ph-bold ph-calendar-plus"></i></div>
-            <div class="action-text"><strong>Book Appointment</strong><small>Find nearby</small></div>
-          </a>
+          <div class="section-title" style="margin-top: 36px;"><i class="ph-bold ph-flask"></i> Advanced Lab Sync</div>
+          <section class="advanced-labs" data-page="health"></section>
         </div>
-
-        <div class="section-title" style="margin-top: 36px;"><i class="ph-bold ph-flask"></i> Advanced Lab Sync</div>
-        <section class="advanced-labs" data-page="health"></section>
       </div>
     </div>
-  </div>
 
-  <!-- Scripts -->
-  <script type="module">
-    import { DemoUsers, injectDemoData } from './js/demo-data.js';
-    import { MedicalBrain } from './js/medical-brain.js';
-    const brain = new MedicalBrain();
+    <!-- Scripts -->
+    <script type="module">
+      import { DemoUsers, injectDemoData } from './js/demo-data.js';
+      import { MedicalBrain } from './js/medical-brain.js';
+      const brain = new MedicalBrain();
 
-    const HEALTH_MEDS = [
-      { id: 1, name: 'Metformin', dosage: '500mg', frequency: 'Twice daily', times: ['08:00 AM', '08:00 PM'], stock: 28, color: '#3b82f6', colorDark: '#2563eb', category: 'Diabetes' },
-      { id: 2, name: 'Lisinopril', dosage: '10mg', frequency: 'Once daily', times: ['09:00 AM'], stock: 45, color: '#ef4444', colorDark: '#dc2626', category: 'Blood Pressure' },
-      { id: 3, name: 'Atorvastatin', dosage: '20mg', frequency: 'Once daily', times: ['10:00 PM'], stock: 12, color: '#8b5cf6', colorDark: '#7c3aed', category: 'Cholesterol' },
-      { id: 4, name: 'Aspirin', dosage: '81mg', frequency: 'Once daily', times: ['08:00 AM'], stock: 60, color: '#10b981', colorDark: '#059669', category: 'Cardio' }
-    ];
+      const HEALTH_MEDS = [
+        { id: 1, name: 'Metformin', dosage: '500mg', frequency: 'Twice daily', times: ['08:00 AM', '08:00 PM'], stock: 28, color: '#3b82f6', colorDark: '#2563eb', category: 'Diabetes' },
+        { id: 2, name: 'Lisinopril', dosage: '10mg', frequency: 'Once daily', times: ['09:00 AM'], stock: 45, color: '#ef4444', colorDark: '#dc2626', category: 'Blood Pressure' },
+        { id: 3, name: 'Atorvastatin', dosage: '20mg', frequency: 'Once daily', times: ['10:00 PM'], stock: 12, color: '#8b5cf6', colorDark: '#7c3aed', category: 'Cholesterol' },
+        { id: 4, name: 'Aspirin', dosage: '81mg', frequency: 'Once daily', times: ['08:00 AM'], stock: 60, color: '#10b981', colorDark: '#059669', category: 'Cardio' }
+      ];
 
-    const HEALTH_TIME_SLOTS = [
-      { time: '08:00 AM', meds: [1, 4], status: 'taken' },
-      { time: '09:00 AM', meds: [2], status: 'taken' },
-      { time: '12:00 PM', meds: [], status: 'due' },
-      { time: '08:00 PM', meds: [1], status: 'upcoming' },
-      { time: '10:00 PM', meds: [3], status: 'upcoming' }
-    ];
+      const HEALTH_TIME_SLOTS = [
+        { time: '08:00 AM', meds: [1, 4], status: 'taken' },
+        { time: '09:00 AM', meds: [2], status: 'taken' },
+        { time: '12:00 PM', meds: [], status: 'due' },
+        { time: '08:00 PM', meds: [1], status: 'upcoming' },
+        { time: '10:00 PM', meds: [3], status: 'upcoming' }
+      ];
 
-    document.addEventListener('DOMContentLoaded', () => {
-      injectDemoData();
-      initChart();
-      startLiveVitals();
-      renderTimeline();
-      renderMedicationCards();
-      renderHealthOrgans();
-    });
-
-    function renderTimeline() {
-      const timeline = document.getElementById('timeline');
-      if (!timeline) return;
-      timeline.innerHTML = '';
-      HEALTH_TIME_SLOTS.forEach(slot => {
-        const div = document.createElement('div');
-        div.className = `time-slot ${slot.status}`;
-        div.innerHTML = `<div class="time-label">${slot.time}</div><div style="font-size:11px;opacity:0.6;">${slot.status}</div>`;
-        timeline.appendChild(div);
+      document.addEventListener('DOMContentLoaded', () => {
+        injectDemoData();
+        initChart();
+        startLiveVitals();
+        renderTimeline();
+        renderMedicationCards();
+        renderHealthOrgans();
       });
-    }
 
-    function renderHealthOrgans() {
-      const grid = document.getElementById('health-organ-grid');
-      if (!grid) return;
-      grid.innerHTML = '';
+      function renderTimeline() {
+        const timeline = document.getElementById('timeline');
+        if (!timeline) return;
+        timeline.innerHTML = '';
+        HEALTH_TIME_SLOTS.forEach(slot => {
+          const div = document.createElement('div');
+          div.className = `time-slot ${slot.status}`;
+          div.innerHTML = `<div class="time-label">${slot.time}</div><div style="font-size:11px;opacity:0.6;">${slot.status}</div>`;
+          timeline.appendChild(div);
+        });
+      }
 
-      const organs = window.PATIENT_OS.organs;
-      Object.entries(organs).forEach(([key, o]) => {
-        // Determine color based on simValue
-        const color = o.simValue > 60 ? '#10b981' : (o.simValue > 30 ? '#f59e0b' : '#ef4444');
-        const statusText = o.simValue > 60 ? 'OPTIMAL' : (o.simValue > 30 ? 'ATTENTION' : 'CRITICAL');
+      function renderHealthOrgans() {
+        const grid = document.getElementById('health-organ-grid');
+        if (!grid) return;
+        grid.innerHTML = '';
 
-        const card = document.createElement('div');
-        card.className = 'tile';
-        card.style.display = 'flex';
-        card.style.gap = '15px';
-        card.style.alignItems = 'center';
-        card.innerHTML = `
+        const organs = window.PATIENT_OS.organs;
+        Object.entries(organs).forEach(([key, o]) => {
+          // Determine color based on simValue
+          const color = o.simValue > 60 ? '#10b981' : (o.simValue > 30 ? '#f59e0b' : '#ef4444');
+          const statusText = o.simValue > 60 ? 'OPTIMAL' : (o.simValue > 30 ? 'ATTENTION' : 'CRITICAL');
+
+          const card = document.createElement('div');
+          card.className = 'tile';
+          card.style.display = 'flex';
+          card.style.gap = '15px';
+          card.style.alignItems = 'center';
+          card.innerHTML = `
           <div class="organ-icon-box"
             style="width:50px; height:50px; background:rgba(255,255,255,0.05); border-radius:12px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:24px;">
             <i class="ph-fill ${o.icon}"></i>
@@ -1484,78 +1561,78 @@
             style="background:none; border:1px solid var(--glass-border); padding:8px; border-radius:8px; color:var(--text-muted); cursor:pointer;"
             onclick="window.location.href='patient-organs.html'"><i class="ph-bold ph-caret-right"></i></button>
         `;
-        grid.appendChild(card);
-      });
-    }
-
-    function renderMedicationCards() {
-      const grid = document.getElementById('meds-grid');
-      if (!grid) return;
-      grid.innerHTML = '';
-      HEALTH_MEDS.forEach(med => {
-        const card = document.createElement('div');
-        card.className = 'med-card-lite';
-        card.style.setProperty('--med-color', med.color);
-        card.style.setProperty('--med-color-dark', med.colorDark);
-        card.innerHTML = `<div class="med-icon-large"><i class="ph-fill ph-pill"></i></div><div><h4 style="margin:0;color:white;">${med.name}</h4><p style="opacity:0.7;font-size:12px;margin:0;">${med.dosage}</p></div>`;
-        grid.appendChild(card);
-      });
-    }
-
-    function startLiveVitals() {
-      setInterval(() => {
-        document.getElementById('v-hr').innerHTML = (60 + Math.floor(Math.random() * 20)) + '<small>bpm</small>';
-      }, 3000);
-    }
-
-    function initChart() {
-      const ctx = document.getElementById('trend-chart');
-      if (ctx) {
-        new Chart(ctx.getContext('2d'), {
-          type: 'line',
-          data: {
-            labels: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
-            datasets: [{
-              label: 'Heart Rate',
-              data: [72, 68, 75, 70, 73, 69, 72],
-              borderColor: '#3b82f6',
-              backgroundColor: 'rgba(59, 130, 246, 0.1)',
-              fill: true
-            }]
-          },
-          options: { responsive: true, maintainAspectRatio: false }
+          grid.appendChild(card);
         });
       }
-    }
-  </script>
-  <script>
-    function toggleTheme() {
-      const html = document.documentElement;
-      html.setAttribute('data-theme', html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
-    }
 
-    function analyzeHealth() {
-      const note = document.getElementById('soap-note');
-      const insight = document.getElementById('ai-insight');
-      const btn = document.querySelector('button[onclick="analyzeHealth()"]');
-
-      if (note.style.display === 'block') {
-        note.style.display = 'none';
-        insight.style.display = 'block';
-        btn.innerHTML = '<i class="ph-bold ph-sparkle"></i> Deep Analysis';
-        btn.style.background = 'linear-gradient(135deg, var(--color-blue), var(--color-purple))';
-      } else {
-        insight.style.display = 'none';
-        // Simulate processing
-        btn.innerHTML = '<i class="ph-bold ph-spinner" style="animation:spin 1s infinite linear"></i> Generating SOAP...';
-        setTimeout(() => {
-          note.style.display = 'block';
-          btn.innerHTML = '<i class="ph-bold ph-check"></i> Standard View';
-          btn.style.background = 'var(--glass-bg)';
-        }, 800);
+      function renderMedicationCards() {
+        const grid = document.getElementById('meds-grid');
+        if (!grid) return;
+        grid.innerHTML = '';
+        HEALTH_MEDS.forEach(med => {
+          const card = document.createElement('div');
+          card.className = 'med-card-lite';
+          card.style.setProperty('--med-color', med.color);
+          card.style.setProperty('--med-color-dark', med.colorDark);
+          card.innerHTML = `<div class="med-icon-large"><i class="ph-fill ph-pill"></i></div><div><h4 style="margin:0;color:white;">${med.name}</h4><p style="opacity:0.7;font-size:12px;margin:0;">${med.dosage}</p></div>`;
+          grid.appendChild(card);
+        });
       }
-    }
-  </script>
+
+      function startLiveVitals() {
+        setInterval(() => {
+          document.getElementById('v-hr').innerHTML = (60 + Math.floor(Math.random() * 20)) + '<small>bpm</small>';
+        }, 3000);
+      }
+
+      function initChart() {
+        const ctx = document.getElementById('trend-chart');
+        if (ctx) {
+          new Chart(ctx.getContext('2d'), {
+            type: 'line',
+            data: {
+              labels: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
+              datasets: [{
+                label: 'Heart Rate',
+                data: [72, 68, 75, 70, 73, 69, 72],
+                borderColor: '#3b82f6',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                fill: true
+              }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+          });
+        }
+      }
+    </script>
+    <script>
+      function toggleTheme() {
+        const html = document.documentElement;
+        html.setAttribute('data-theme', html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+      }
+
+      function analyzeHealth() {
+        const note = document.getElementById('soap-note');
+        const insight = document.getElementById('ai-insight');
+        const btn = document.querySelector('button[onclick="analyzeHealth()"]');
+
+        if (note.style.display === 'block') {
+          note.style.display = 'none';
+          insight.style.display = 'block';
+          btn.innerHTML = '<i class="ph-bold ph-sparkle"></i> Deep Analysis';
+          btn.style.background = 'linear-gradient(135deg, var(--color-blue), var(--color-purple))';
+        } else {
+          insight.style.display = 'none';
+          // Simulate processing
+          btn.innerHTML = '<i class="ph-bold ph-spinner" style="animation:spin 1s infinite linear"></i> Generating SOAP...';
+          setTimeout(() => {
+            note.style.display = 'block';
+            btn.innerHTML = '<i class="ph-bold ph-check"></i> Standard View';
+            btn.style.background = 'var(--glass-bg)';
+          }, 800);
+        }
+      }
+    </script>
 </body>
 
 </html>
