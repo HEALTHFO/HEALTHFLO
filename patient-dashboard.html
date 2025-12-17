@@ -3346,6 +3346,103 @@
         };
 
 
+        // --- 3D MODEL INITIALIZATION ---
+        let scene, camera, renderer, currentModel;
+
+        function initThree() {
+            const container = document.getElementById('model-3d-container');
+            if (!container) return;
+
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.z = 3;
+
+            renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setClearColor(0x000000, 0);
+            container.appendChild(renderer.domElement);
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(5, 5, 5);
+            scene.add(directionalLight);
+
+            animate();
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            if (currentModel) {
+                currentModel.rotation.y += 0.005;
+            }
+            renderer.render(scene, camera);
+        }
+
+        function loadOrganModel(organKey) {
+            const organ = window.PATIENT_OS?.organs[organKey];
+            if (!organ) return;
+
+            // Remove existing model
+            if (currentModel) {
+                scene.remove(currentModel);
+            }
+
+            const modelPath = organ.modelPath ? `3d_models/${organ.modelPath}.glb` : null;
+
+            if (!modelPath || !THREE.GLTFLoader) {
+                console.warn('No 3D model or GLTFLoader for:', organKey);
+                return;
+            }
+
+            const loader = new THREE.GLTFLoader();
+            loader.load(
+                modelPath,
+                (gltf) => {
+                    currentModel = gltf.scene;
+                    currentModel.scale.set(1.5, 1.5, 1.5);
+                    scene.add(currentModel);
+                    console.log('✅ Loaded 3D model:', modelPath);
+                },
+                undefined,
+                (error) => {
+                    console.error('❌ Error loading 3D model:', error);
+                }
+            );
+        }
+
+        // --- UPDATE UI WITH VITALS ---
+        function updateUI(organKey) {
+            activeOrgan = organKey;
+            const data = window.PATIENT_OS?.organs[organKey];
+            if (!data) return;
+
+            // Update vital cards
+            if (data.stats && data.stats.length >= 4) {
+                document.getElementById('c1-title').textContent = data.stats[0].title;
+                document.getElementById('c1-val').textContent = `${data.stats[0].base} ${data.stats[0].unit}`;
+
+                document.getElementById('c2-title').textContent = data.stats[1].title;
+                document.getElementById('c2-val').textContent = `${data.stats[1].base} ${data.stats[1].unit}`;
+
+                document.getElementById('c3-title').textContent = data.stats[2].title;
+                document.getElementById('c3-val').textContent = `${data.stats[2].base} ${data.stats[2].unit}`;
+
+                document.getElementById('c4-title').textContent = data.stats[3].title;
+                document.getElementById('c4-val').textContent = `${data.stats[3].base} ${data.stats[3].unit}`;
+            }
+
+            // Update nutrients if function exists
+            if (typeof renderNutrients === 'function') {
+                renderNutrients();
+            }
+
+            // Update labs if function exists
+            if (typeof renderLabs === 'function') {
+                renderLabs();
+            }
+        }
 
         // --- INIT ---
         document.addEventListener('DOMContentLoaded', () => {
@@ -3360,19 +3457,41 @@
             if (window.PATIENT_OS && window.PATIENT_OS.utils) {
                 window.PATIENT_OS.utils.simulateVitals();
                 console.log('✅ Live vitals simulation started');
+
+                // Listen for vital updates and refresh the display
+                window.addEventListener('vital-update', (event) => {
+                    const { hr, spo2, bp } = event.detail;
+
+                    // Update heart rate card (c2)
+                    const hrCard = document.getElementById('c2-val');
+                    if (hrCard && activeOrgan === 'heart') {
+                        hrCard.textContent = `${hr} bpm`;
+                    }
+
+                    // Update main stat display
+                    const mainStat = document.getElementById('main-stat');
+                    if (mainStat) {
+                        mainStat.textContent = `${hr} BPM`;
+                    }
+
+                    console.log('💓 Vitals updated:', { hr, spo2, bp });
+                });
             }
 
             // Event Delegation for Organ Clicks
-            document.querySelector('.organ-tray').addEventListener('click', (e) => {
-                const btn = e.target.closest('.organ-item');
-                if (!btn) return;
+            const organTray = document.querySelector('.organ-tray');
+            if (organTray) {
+                organTray.addEventListener('click', (e) => {
+                    const btn = e.target.closest('.organ-item');
+                    if (!btn) return;
 
-                document.querySelectorAll('.organ-item').forEach(b => b.classList.remove('selected'));
-                btn.classList.add('selected');
+                    document.querySelectorAll('.organ-item').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
 
-                loadOrganModel(btn.dataset.organ);
-                updateUI(btn.dataset.organ);
-            });
+                    loadOrganModel(btn.dataset.organ);
+                    updateUI(btn.dataset.organ);
+                });
+            }
 
             window.addEventListener('storage', (event) => {
                 if (event.key === SYNC_KEY) {
