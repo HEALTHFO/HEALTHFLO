@@ -142,7 +142,7 @@ const PATIENT_OS = {
     },
     stomach: {
       title: "Gastric System", simValue: 60, icon: "ph-thermometer",
-      modelPath: "stomach",
+      modelPath: null,
       stats: [
         { id: "c1", title: "Gastric pH", base: 2.1, unit: "pH", icon: "ph-eyedropper", type: "norm" },
         { id: "c2", title: "Motility", base: 3, unit: "cpm", icon: "ph-wave-sine", type: "norm" },
@@ -160,7 +160,7 @@ const PATIENT_OS = {
     },
     intestines: {
       title: "Digestive Tract", simValue: 55, icon: "ph-arrows-in",
-      modelPath: "intestine",
+      modelPath: null,
       stats: [
         { id: "c1", title: "Absorption", base: 92, unit: "%", icon: "ph-arrows-in", type: "perc" },
         { id: "c2", title: "Microbiome", base: 8.5, unit: "/10", icon: "ph-bug", type: "score" },
@@ -178,7 +178,7 @@ const PATIENT_OS = {
     },
     pancreas: {
       title: "Endocrine/Exocrine", simValue: 40, icon: "ph-drop",
-      modelPath: "pancreas",
+      modelPath: null,
       stats: [
         { id: "c1", title: "Insulin", base: 6.5, unit: "uIU", icon: "ph-syringe", type: "norm" },
         { id: "c2", title: "Lipase", base: 35, unit: "U/L", icon: "ph-drop", type: "norm" },
@@ -201,7 +201,7 @@ const PATIENT_OS = {
     },
     gallbladder: {
       title: "Biliary System", simValue: 18, icon: "ph-diamonds-four",
-      modelPath: "gallbladder",
+      modelPath: null,
       stats: [
         { id: "c1", title: "Bile Flow", base: 88, unit: "%", icon: "ph-arrows-left-right", type: "perc" },
         { id: "c2", title: "Cholesterol", base: 165, unit: "mg/dL", icon: "ph-drop-half-bottom", type: "norm" },
@@ -219,7 +219,7 @@ const PATIENT_OS = {
     },
     urinary: {
       title: "Urinary Tract", simValue: 12, icon: "ph-funnel",
-      modelPath: "urinary",
+      modelPath: null,
       stats: [
         { id: "c1", title: "Filtration", base: 97, unit: "%", icon: "ph-funnel", type: "perc" },
         { id: "c2", title: "Hydration", base: 94, unit: "%", icon: "ph-drop", type: "perc" },
@@ -237,7 +237,7 @@ const PATIENT_OS = {
     },
     eyes: {
       title: "Ophthalmic", simValue: 20, icon: "ph-eye",
-      modelPath: "eye",
+      modelPath: "eyes",
       stats: [
         { id: "c1", title: "IOP", base: 14, unit: "mmHg", icon: "ph-gauge", type: "norm" },
         { id: "c2", title: "Vision", base: 20, unit: "/20", icon: "ph-binoculars", type: "norm" },
@@ -255,7 +255,7 @@ const PATIENT_OS = {
     },
     spleen: {
       title: "Lymphatic", simValue: 22, icon: "ph-shield-star",
-      modelPath: "spleen",
+      modelPath: null,
       stats: [
         { id: "c1", title: "Immune Load", base: 18, unit: "%", icon: "ph-virus", type: "perc" },
         { id: "c2", title: "Lymph Flow", base: 82, unit: "%", icon: "ph-arrows-left-right", type: "perc" },
@@ -273,7 +273,7 @@ const PATIENT_OS = {
     },
     thyroid: {
       title: "Endocrine", simValue: 32, icon: "ph-butterfly",
-      modelPath: "thyroid",
+      modelPath: null,
       stats: [
         { id: "c1", title: "TSH", base: 2.1, unit: "uIU/mL", icon: "ph-activity", type: "norm" },
         { id: "c2", title: "Free T3", base: 3.3, unit: "pg/mL", icon: "ph-flame", type: "norm" },
@@ -291,7 +291,7 @@ const PATIENT_OS = {
     },
     muscle: {
       title: "Musculoskeletal", simValue: 44, icon: "ph-arm-flex",
-      modelPath: "muscle",
+      modelPath: null,
       stats: [
         { id: "c1", title: "Strength", base: 78, unit: "%", icon: "ph-lightning", type: "perc" },
         { id: "c2", title: "Recovery", base: 6, unit: "hrs", icon: "ph-moon-stars", type: "norm" },
@@ -329,13 +329,59 @@ const PATIENT_OS = {
 
   // GLOBAL UTILS
   utils: {
+    toggleTheme: function () {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('hf_theme', next);
+
+      // Update toggle button icon if exists
+      const btn = document.querySelector('.theme-toggle');
+      if (btn) {
+        if (next === 'light') {
+          btn.innerHTML = '<i class="ph-bold ph-moon"></i>'; // Icon to switch back to dark
+        } else {
+          btn.innerHTML = '<i class="ph-bold ph-sun"></i>';
+        }
+      }
+    },
+
+    initTheme: function () {
+      const saved = localStorage.getItem('hf_theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', saved);
+    },
+
+    simulateVitals: function (callback) {
+      setInterval(() => {
+        const hr = 60 + Math.floor(Math.random() * 40);
+        const spo2 = 95 + Math.floor(Math.random() * 5);
+        const sys = 110 + Math.floor(Math.random() * 20);
+        const dia = 70 + Math.floor(Math.random() * 10);
+
+        if (callback) callback({ hr, spo2, bp: `${sys}/${dia}` });
+
+        // Broadcast event for decoupled listeners
+        window.dispatchEvent(new CustomEvent('vital-update', {
+          detail: { hr, spo2, bp: `${sys}/${dia}` }
+        }));
+
+        // Synced OS state
+        if (PATIENT_OS.organs && PATIENT_OS.organs.heart) {
+          PATIENT_OS.organs.heart.stats[0].base = sys;
+          PATIENT_OS.organs.heart.stats[1].base = hr;
+          PATIENT_OS.organs.heart.stats[2].base = spo2;
+        }
+
+      }, 2000);
+    },
+
     getFormattedStats(organKey) {
       const org = PATIENT_OS.organs[organKey];
       if (!org) return "No data";
       return org.stats.map(s => `${s.title}: ${s.base}${s.unit}`).join(', ');
     },
 
-    // Simulates slight drift for realism across all pages
     getDriftingValue(base, range = 2) {
       return (base + (Math.random() * range - range / 2)).toFixed(1);
     }
@@ -344,3 +390,9 @@ const PATIENT_OS = {
 
 // Expose to window for global access
 window.PATIENT_OS = PATIENT_OS;
+
+// Auto-init theme
+PATIENT_OS.utils.initTheme();
+
+// Global Alias for consistency across pages
+window.toggleTheme = PATIENT_OS.utils.toggleTheme;
