@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HealthFlo - Live Tracking</title>
+    <!-- Icons & Fonts -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --glass-panel: rgba(15, 23, 42, 0.85);
+            --color-blue: #0A84FF;
+            --color-green: #10b981;
+            --color-red: #ef4444;
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background: var(--bg-dark);
+        }
+
+        /* REALISTIC DARK MAP STYLES */
+        #map-container {
+            width: 100%;
+            height: 100%;
+            background-color: #1a202c;
+            /* Placeholder pattern for map tiles */
+            background-image:
+                radial-gradient(#2d3748 1px, transparent 1px),
+                radial-gradient(#2d3748 1px, transparent 1px);
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 20px;
+            position: relative;
+        }
+
+        /* Roads */
+        .road {
+            position: absolute;
+            background: #334155;
+            opacity: 0.8;
+            border-radius: 4px;
+        }
+
+        .road.main {
+            width: 12px;
+        }
+
+        .road.secondary {
+            width: 6px;
+            background: #475569;
+        }
+
+        /* Overlay UI */
+        .ui-safe-area {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .top-bar {
+            pointer-events: auto;
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .back-btn {
+            width: 44px;
+            height: 44px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            color: black;
+            font-size: 20px;
+        }
+
+        .status-pill {
+            background: black;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 100px;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .live-indicator {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #10b981;
+            animation: blink 1.5s infinite;
+        }
+
+        /* Bottom Sheet */
+        .bottom-sheet {
+            pointer-events: auto;
+            position: absolute;
+            bottom: 30px;
+            left: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            max-width: 500px;
+            margin: 0 auto;
+            transform: translateY(0);
+            transition: 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .sheet-handle {
+            width: 40px;
+            height: 4px;
+            background: #cbd5e1;
+            border-radius: 4px;
+            margin: 0 auto 16px auto;
+        }
+
+        .driver-info {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .driver-img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #e2e8f0;
+        }
+
+        .driver-details h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .driver-details p {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .rating-badge {
+            background: #fef3c7;
+            color: #d97706;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .progress-track {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 20px;
+        }
+
+        .p-bar {
+            height: 4px;
+            flex: 1;
+            background: #e2e8f0;
+            border-radius: 4px;
+        }
+
+        .p-bar.active {
+            background: #10b981;
+        }
+
+        .action-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #0f172a;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #334155;
+        }
+
+        .btn-emergency {
+            background: #fee2e2;
+            color: #ef4444;
+        }
+
+        /* MARKERS */
+        .marker {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            font-size: 20px;
+            z-index: 5;
+            transition: transform 3s linear;
+        }
+
+        .marker.user {
+            background: #0A84FF;
+            color: white;
+            box-shadow: 0 0 0 10px rgba(10, 132, 255, 0.2);
+            z-index: 4;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .marker.target {
+            background: white;
+            color: black;
+            border: 2px solid white;
+        }
+
+        /* Drone Specific */
+        .drone-marker {
+            width: 60px;
+            height: 60px;
+            background: rgba(16, 185, 129, 0.9);
+            color: white;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            z-index: 6;
+            box-shadow: 0 20px 50px rgba(16, 185, 129, 0.4);
+        }
+
+        .drone-shadow {
+            position: absolute;
+            bottom: -40px;
+            width: 40px;
+            height: 10px;
+            background: black;
+            opacity: 0.2;
+            border-radius: 50%;
+            filter: blur(4px);
+        }
+
+        /* Animations */
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        @keyframes pulse-ring {
+            0% {
+                transform: scale(1);
+                opacity: 0.4;
+            }
+
+            100% {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+
+        .pulse-ring {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: #0A84FF;
+            animation: pulse-ring 2s infinite;
+            z-index: -1;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="map-container">
+        <!-- Procedural Roads (CSS) -->
+        <div class="road main" style="top:0; bottom:0; left:40%; transform: rotate(15deg);"></div>
+        <div class="road main" style="left:0; right:0; top:60%; transform: rotate(-5deg);"></div>
+        <div class="road secondary" style="top:0; bottom:0; left:60%;"></div>
+        <div class="road secondary" style="left:0; right:0; top:30%;"></div>
+
+        <!-- Markers -->
+        <!-- User Location (Center) -->
+        <div class="marker user">
+            <i class="ph-fill ph-navigation-arrow"></i>
+            <div class="pulse-ring"></div>
+        </div>
+
+        <!-- Dynamic Marker (Will be moved by JS) -->
+        <div id="moving-entity" class="marker target" style="top: 20%; left: 20%;">
+            <i class="ph-fill ph-moped"></i>
+        </div>
+
+        <!-- UI -->
+        <div class="ui-safe-area">
+            <div class="top-bar">
+                <div class="back-btn" onclick="window.history.back()"><i class="ph-bold ph-arrow-left"></i></div>
+                <div class="status-pill">
+                    <div class="live-indicator"></div>
+                    <span id="top-status-text">Arriving in 12 mins</span>
+                </div>
+            </div>
+
+            <div class="bottom-sheet">
+                <div class="sheet-handle"></div>
+
+                <div class="driver-info">
+                    <img src="https://i.pravatar.cc/150?u=driver" class="driver-img">
+                    <div class="driver-details">
+                        <h3 id="driver-name">Ramesh Kumar</h3>
+                        <p id="vehicle-info">Hero Splendor • KA 01 EQ 2291</p>
+                    </div>
+                    <div style="margin-left:auto; text-align:right;">
+                        <div class="rating-badge">4.9 ★</div>
+                        <div style="font-size:10px; color:#64748b; margin-top:4px;">1.2k Trips</div>
+                    </div>
+                </div>
+
+                <div class="progress-track" id="prog-track">
+                    <div class="p-bar active"></div>
+                    <div class="p-bar active"></div>
+                    <div class="p-bar active"></div>
+                    <div class="p-bar"></div>
+                </div>
+
+                <h2 style="font-size:20px; font-weight:700; margin-bottom:4px; color:#0f172a;" id="main-status-title">
+                    Medicine on the way</h2>
+                <p style="font-size:13px; color:#64748b; margin-bottom:20px;" id="main-status-sub">Your order from
+                    Apollo Pharmacy is out for delivery.</p>
+
+                <div class="action-row">
+                    <button class="btn btn-secondary call-btn"><i class="ph-fill ph-phone"></i> Call</button>
+                    <button class="btn btn-primary" id="track-btn">Share Status</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/patient-os.js"></script>
+    <script src="js/localization.js"></script>
+    <script>
+        // --- LOGIC ---
+        const urlParams = new URLSearchParams(window.location.search);
+        const mode = urlParams.get('mode') || 'pharmacy'; // pharmacy, emergency, drone, lab
+
+        const entityMarker = document.getElementById('moving-entity');
+        const driverName = document.getElementById('driver-name');
+        const vehicleInfo = document.getElementById('vehicle-info');
+        const statusTitle = document.getElementById('main-status-title');
+        const statusSub = document.getElementById('main-status-sub');
+        const topStatus = document.getElementById('top-status-text');
+        const callBtn = document.querySelector('.call-btn');
+        const trackBtn = document.getElementById('track-btn');
+
+        // Apply static localization
+        if (trackBtn) trackBtn.innerText = window.t('btn_share');
+        if (callBtn) callBtn.innerHTML = `<i class="ph-fill ph-phone"></i> ${window.t('btn_call')}`;
+
+        // Styles for different modes
+        if (mode === 'emergency' || mode === 'drone') {
+            entityMarker.innerHTML = `<div class="drone-marker"><i class="ph-fill ph-airplane-tilt"></i></div><div class="drone-shadow"></div>`;
+            entityMarker.className = 'marker'; // Remove default circle style
+            entityMarker.style.background = 'transparent';
+            entityMarker.style.boxShadow = 'none';
+            entityMarker.style.border = 'none';
+
+            driverName.innerText = "Drone Unit Alpha";
+            vehicleInfo.innerText = "Autonomous • MED-DRONE-X1";
+            statusTitle.innerText = window.t('track_drone_title');
+            statusSub.innerText = window.t('track_drone_sub');
+            topStatus.innerText = window.t('track_eta') + ": 2 Mins";
+            callBtn.style.display = 'none'; // Can't call a drone
+
+            // Add siren sound effect logic if needed (optional)
+        } else if (mode === 'ambulance') {
+            entityMarker.innerHTML = `<i class="ph-fill ph-ambulance" style="color:#ef4444;"></i>`;
+            entityMarker.style.border = '2px solid #ef4444';
+
+            driverName.innerText = "EMS Team A";
+            vehicleInfo.innerText = "ALS Ambulance • MH 02 DL 9922";
+            statusTitle.innerText = window.t('track_ems_title');
+            statusSub.innerText = window.t('track_ems_sub');
+            topStatus.innerText = window.t('track_eta') + ": 8 Mins";
+            callBtn.innerHTML = `<i class="ph-fill ph-phone"></i> Contact EMS`;
+            callBtn.classList.add('btn-emergency');
+        } else if (mode === 'lab') {
+            entityMarker.innerHTML = `<i class="ph-fill ph-flask" style="color:#8b5cf6;"></i>`;
+            driverName.innerText = "Suresh (Technician)";
+            vehicleInfo.innerText = "Home Collection Agent";
+            statusTitle.innerText = window.t('track_lab_title');
+            topStatus.innerText = window.t('track_arriving_in') + " 15 mins";
+            statusSub.innerText = window.t('track_lab_sub');
+        } else {
+            // Pharmacy default
+            statusTitle.innerText = window.t('track_med_way');
+            statusSub.innerText = window.t('track_med_sub');
+            topStatus.innerText = window.t('track_arriving_in') + " 12 mins";
+        }
+
+        // --- ANIMATION LOOP ---
+
+        // --- ANIMATION LOOP ---
+        // Simulate movement from top-left (20%, 20%) to center (50%, 50%)
+        let progress = 0;
+        const startX = 20; const startY = 20;
+        const endX = 48; const endY = 48; // Stop just before user
+
+        function animate() {
+            progress += 0.2; // Speed
+            if (progress > 100) progress = 100;
+
+            const currentX = startX + (endX - startX) * (progress / 100);
+            const currentY = startY + (endY - startY) * (progress / 100);
+
+            entityMarker.style.top = currentY + '%';
+            entityMarker.style.left = currentX + '%';
+
+            if (progress < 100) {
+                requestAnimationFrame(animate);
+            } else {
+                // Arrived state
+                topStatus.innerText = window.t("track_arrived");
+                statusTitle.innerText = window.t("track_partner_arrived");
+            }
+        }
+
+        // Start animation after slight delay
+        setTimeout(() => {
+            requestAnimationFrame(animate);
+        }, 1000);
+
+    </script>
+</body>
+
+</html>

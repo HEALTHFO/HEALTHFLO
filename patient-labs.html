@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>HealthFlo - Labs & Diagnostics</title>
+
+  <!-- Icons & Fonts -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Lab Specific Styles -->
+  <link rel="stylesheet" href="css/patient-labs.css" />
+  <link rel="stylesheet" href="css/advanced-labs.css" />
+
+  <style>
+    /* --- CORE THEME VARIABLES (From Dashboard) --- */
+    :root {
+      --bg-radial: radial-gradient(circle at 20% 30%, #506176 0%, #1a1f2b 55%, #0E121B 100%);
+      --glass-bg: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-blur: blur(24px);
+      --text-main: #ffffff;
+      --text-muted: #94a3b8;
+      --color-blue: #0A84FF;
+
+      /* Overriding Lab CSS Variables to match Dashboard Theme */
+      --bg: transparent;
+      --surface: rgba(22, 28, 38, 0.6);
+      --surface-2: rgba(255, 255, 255, 0.05);
+      --border: rgba(255, 255, 255, 0.08);
+      --text: #ffffff;
+      --muted: #94a3b8;
+      /* Brand Blue mapping */
+      --brand-700: #0A84FF;
+      --brand-600: #3b82f6;
+      --brand-500: #60a5fa;
+
+      --sidebar-bg: rgba(255, 255, 255, 0.02);
+      --browser-bar-bg: rgba(0, 0, 0, 0.2);
+      --divider-color: rgba(255, 255, 255, 0.05);
+    }
+
+    /* --- DASHBOARD SHELL STYLES --- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', 'Plus Jakarta Sans', sans-serif;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(100, 100, 100, 0.2);
+      border-radius: 10px;
+    }
+
+    body {
+      height: 100vh;
+      width: 100vw;
+      background: var(--bg-radial) !important;
+      overflow: hidden;
+      user-select: none;
+      color: var(--text-main);
+    }
+
+    .app-container {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .browser-bar {
+      height: 60px;
+      display: flex;
+      align-items: center;
+      padding: 0 32px;
+      gap: 24px;
+      border-bottom: 1px solid var(--glass-border);
+      background: var(--browser-bar-bg);
+      backdrop-filter: blur(10px);
+      z-index: 20;
+      flex-shrink: 0;
+    }
+
+    .window-controls {
+      display: flex;
+      gap: 8px;
+      margin-right: 12px;
+    }
+
+    .window-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      opacity: 0.8;
+    }
+
+    .branding-right {
+      margin-left: auto;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: 1px;
+      font-size: 14px;
+      opacity: 0.8;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .branding-right span {
+      color: var(--color-blue);
+      text-shadow: 0 0 10px rgba(10, 132, 255, 0.5);
+    }
+
+    .theme-toggle {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--glass-border);
+      border: 1px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-muted);
+      margin-left: 10px;
+    }
+
+    .dashboard-body {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .sidebar {
+      width: 120px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 32px 0;
+      gap: 18px;
+      border-right: 1px solid var(--glass-border);
+      z-index: 10;
+      background: var(--sidebar-bg);
+      backdrop-filter: var(--glass-blur);
+      flex-shrink: 0;
+    }
+
+    .logo {
+      font-weight: 800;
+      color: var(--text-main);
+      font-size: 24px;
+      letter-spacing: -1px;
+      margin-bottom: 12px;
+    }
+
+    .logo span {
+      color: var(--color-blue);
+    }
+
+    .menu-item {
+      width: 90px;
+      height: 74px;
+      border-radius: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: var(--text-muted);
+      font-size: 22px;
+      cursor: pointer;
+      transition: 0.3s;
+      border: 1px solid transparent;
+      text-decoration: none;
+      flex-direction: column;
+      gap: 6px;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .menu-item:hover {
+      color: var(--text-main);
+      background: var(--glass-bg);
+      border-color: var(--glass-border);
+    }
+
+    .menu-item.active {
+      background: var(--glass-border);
+      color: var(--color-blue);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--glass-border);
+    }
+
+    .menu-item.danger {
+      color: #ef4444;
+    }
+
+    .menu-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: inherit;
+      letter-spacing: 0.2px;
+    }
+
+    .sidebar-divider {
+      width: 60%;
+      height: 1px;
+      background: var(--divider-color);
+      margin: 6px auto;
+      opacity: 0.6;
+    }
+
+    .main-content {
+      flex: 1;
+      padding: 30px 40px;
+      overflow-y: auto;
+      position: relative;
+      padding-bottom: 100px;
+      display: block;
+    }
+
+    .header-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 30px;
+      z-index: 5;
+    }
+
+    .page-title h2 {
+      font-size: 18px;
+      color: var(--color-blue);
+      margin-bottom: 5px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .page-title h1 {
+      font-size: 56px;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1;
+      letter-spacing: -2px;
+    }
+
+    .page-title h1 span {
+      font-weight: 300;
+      opacity: 0.8;
+    }
+
+    /* --- Overrides for Lab CSS --- */
+    .hf-header {
+      display: none !important;
+    }
+
+    .hero {
+      padding: 0 !important;
+      overflow: visible !important;
+    }
+
+    .hero::after {
+      display: none;
+    }
+
+    .hero-inner {
+      background: rgba(255, 255, 255, 0.02) !important;
+      backdrop-filter: none !important;
+      border: none !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .wrap {
+      width: 100% !important;
+      max-width: 100% !important;
+      margin: 0 !important;
+    }
+
+    .toolbar .wrap {
+      background: var(--surface) !important;
+      backdrop-filter: blur(20px) !important;
+      border: 1px solid var(--glass-border);
+    }
+
+    @media (max-width: 1200px) {
+      .sidebar {
+        display: none;
+      }
+
+      .hero-inner {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app-container">
+    <!-- Browser Bar -->
+    <div class="browser-bar">
+      <div class="window-controls">
+        <div class="window-dot" style="background: #ef4444;"></div>
+        <div class="window-dot" style="background: #f59e0b;"></div>
+        <div class="window-dot" style="background: #10b981;"></div>
+      </div>
+      <div class="branding-right">
+        <span data-i18n="app_name">HealthFlo</span>
+        <span data-i18n="subtitle">CLINICAL V3</span>
+      </div>
+
+      <div style="margin-left:auto; display:flex; gap:10px;">
+        <select id="lang-select" onchange="window.setLang(this.value)"
+          style="background:var(--glass-bg); color:var(--text-main); border:1px solid var(--glass-border); padding:6px; border-radius:8px; width:80px;">
+          <option value="en">ENG</option>
+          <option value="ta">தமிழ்</option>
+          <option value="hi">हिंदी</option>
+          <option value="ml">മലയാളം</option>
+          <option value="kn">ಕನ್ನಡ</option>
+          <option value="te">తెలుగు</option>
+        </select>
+        <button class="theme-toggle" onclick="toggleTheme()"><i class="ph-bold ph-sun"></i></button>
+      </div>
+    </div>
+
+    <div class="dashboard-body">
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <div class="logo">H<span>+</span></div>
+        <a class="menu-item" href="patient-dashboard.html">
+          <i class="ph ph-heartbeat"></i>
+          <span class="menu-label" data-i18n="nav_dashboard">Dashboard</span>
+        </a>
+        <a class="menu-item" href="patient-health.html">
+          <i class="ph ph-pulse"></i>
+          <span class="menu-label" data-i18n="nav_health">Health</span>
+        </a>
+        <a class="menu-item" href="patient-organs.html">
+          <i class="ph-bold ph-scan"></i>
+          <span class="menu-label" data-i18n="nav_organs">Organs</span>
+        </a>
+        <a class="menu-item active" href="patient-labs.html">
+          <i class="ph-fill ph-flask"></i>
+          <span class="menu-label" data-i18n="nav_labs">Labs</span>
+        </a>
+        <a class="menu-item" href="patient-pharmacy.html">
+          <i class="ph ph-pill"></i>
+          <span class="menu-label" data-i18n="nav_pharmacy">Pharmacy</span>
+        </a>
+        <a class="menu-item" href="patient-hospitals.html">
+          <i class="ph ph-hospital"></i>
+          <span class="menu-label" data-i18n="nav_hospitals">Hospitals</span>
+        </a>
+        <a class="menu-item" href="patient-insurance.html">
+          <i class="ph ph-shield-plus"></i>
+          <span class="menu-label" data-i18n="nav_insurance">Insurance</span>
+        </a>
+        <a class="menu-item" href="patient-devices.html">
+          <i class="ph ph-watch"></i>
+          <span class="menu-label" data-i18n="nav_devices">Devices</span>
+        </a>
+        <a class="menu-item" href="patient-family.html">
+          <i class="ph ph-users"></i>
+          <span class="menu-label" data-i18n="nav_family">Family</span>
+        </a>
+        <a class="menu-item" href="patient-profile.html">
+          <i class="ph ph-user"></i>
+          <span class="menu-label" data-i18n="nav_profile">Profile</span>
+        </a>
+        <div class="sidebar-divider"></div>
+        <a class="menu-item" href="patient-settings.html">
+          <i class="ph ph-gear-six"></i>
+          <span class="menu-label" data-i18n="nav_settings">Settings</span>
+        </a>
+        <a class="menu-item danger" href="index.html" style="margin-top: auto;">
+          <i class="ph ph-power"></i>
+          <span class="menu-label" data-i18n="nav_exit">Exit</span>
+        </a>
+      </div>
+
+      <!-- Main Content -->
+      <div class="main-content">
+        <div class="header-section">
+          <div class="header-left">
+            <div class="page-title">
+              <h2>Tests & Reports</h2>
+              <h1>Lab <span>Diagnostics</span></h1>
+            </div>
+          </div>
+        </div>
+
+        <!-- Original Lab Content (Wrapped) -->
+
+        <!-- Hero -->
+        <section class="hero" aria-labelledby="heroTitle">
+          <div class="wrap hero-inner">
+            <div class="hero-copy">
+              <p class="eyebrow" style="margin-top:0;">Discovery cockpit</p>
+              <h3 id="heroTitle" style="font-size: 32px; font-weight: 700; margin-bottom: 10px;">Book home & in-lab
+                tests</h3>
+              <p class="sub">Compare prices, check home visit availability, and sync reports directly to your Health
+                Dashboard.</p>
+              <div class="hero-pills">
+                <span class="pill soft">AI-assisted sorting</span>
+                <span class="pill soft">Live distance</span>
+                <span class="pill soft">One-tap WhatsApp</span>
+              </div>
+              <div class="hero-actions">
+                <button class="pill solid">Instant home pickup</button>
+                <button class="pill outline">24h reports</button>
+                <button class="pill ghost">Ask AI concierge</button>
+              </div>
+            </div>
+
+            <div class="hero-right">
+              <div class="concierge-card">
+                <div>
+                  <p class="eyebrow">Concierge view</p>
+                  <h3>Labs that feel like your dashboard</h3>
+                </div>
+                <div class="inline-flags">
+                  <span class="pill soft">Voice scheduling</span><span class="pill soft">Smart prep guide</span>
+                </div>
+                <div class="doctor-inline">
+                  <div>
+                    <p class="eyebrow">Doctor actions</p>
+                    <p class="muted">Maps your next lab report to Health.</p>
+                  </div>
+                  <button class="btn btn-primary" id="doctorSync">Sync to Health</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="toolbar" style="margin-top: 20px;">
+          <div class="wrap">
+            <div class="field search">
+              <input id="searchInput" type="search" placeholder="Search lab, area, test (CBC, Ultrasound)..." />
+              <span class="icon">🔎</span>
+            </div>
+            <div class="row">
+              <div class="field"><label>City</label><select id="cityFilter">
+                  <option value="">All</option>
+                  <option>Mumbai</option>
+                  <option>Delhi</option>
+                  <option>Bengaluru</option>
+                  <option>Hyderabad</option>
+                  <option>Chennai</option>
+                  <option>Pune</option>
+                </select></div>
+              <div class="field"><label>Type</label><select id="typeFilter">
+                  <option value="">All</option>
+                  <option value="blood">Blood</option>
+                  <option value="radiology">Imaging</option>
+                </select></div>
+              <label class="switch"><input id="homeOnly" type="checkbox" /><span>Home visit</span></label>
+              <label class="switch"><input id="nearestToggle" type="checkbox" checked /><span>Nearest
+                  first</span></label>
+              <button id="btnLocate" class="btn">Use my location</button>
+            </div>
+            <div id="sortHint" class="hint">Sorted by nearest — using your current location.</div>
+          </div>
+        </section>
+
+        <main class="grid-section">
+          <h2 class="vh">Labs near you</h2>
+          <div class="wrap">
+            <div id="labGrid" class="grid"></div>
+          </div>
+        </main>
+
+        <section class="report-vault">
+          <div class="wrap">
+            <header class="vault-head">
+              <div>
+                <p class="eyebrow">Doctor-mapped reports</p>
+                <h2>Latest lab PDFs &amp; impressions</h2>
+                <p class="muted">See synced reports in-line, mapped by date.</p>
+              </div>
+            </header>
+            <div id="labReportShelf" class="report-grid"></div>
+          </div>
+        </section>
+
+        <section class="advanced-labs" data-page="labs"></section>
+
+      </div>
+    </div>
+
+    <!-- Modal / Sheet (Placed outside main-content for z-index) -->
+    <div id="labModal" class="modal">
+      <div class="sheet">
+        <div class="sheet-head">
+          <div class="lab-hero">
+            <img id="labLogo" class="logo" alt="Lab logo" />
+            <div class="lab-meta">
+              <h3 id="labTitle">Lab</h3>
+              <div class="meta"><span id="labAreaTxt">City</span><span class="pill" id="labHome">Home visit</span><span
+                  class="pill" id="labDistance">-- km</span></div>
+            </div>
+          </div>
+          <div class="head-cta">
+            <button id="labClose" class="icon-btn">✕</button>
+          </div>
+        </div>
+        <div class="tabs">
+          <button class="tab is-active" data-tab="blood">Blood Tests</button>
+          <button class="tab" data-tab="radiology">Radiology</button>
+          <button class="tab" data-tab="book">Book</button>
+        </div>
+        <div class="panels">
+          <section id="panel-blood" class="panel is-active">
+            <div class="panel-head"><input id="bloodSearch" type="search" placeholder="Search tests" class="field"
+                style="padding:10px;" /></div>
+            <div id="bloodList" class="tests"></div>
+          </section>
+          <section id="panel-rad" class="panel">
+            <div id="radList" class="tests"></div>
+          </section>
+          <section id="panel-book" class="panel">
+            <div class="book-grid">
+              <div class="col">
+                <div class="field"><label>Name</label><input id="bookName" type="text" /></div>
+                <div class="field"><label>Date</label><input id="bookDate" type="date" /></div>
+              </div>
+              <div class="col">
+                <div class="summary">
+                  <div id="bookSummary">No tests selected</div>
+                  <div class="tot">Total: <strong id="bookTotal">₹0</strong></div>
+                </div>
+                <button id="btnBookConfirm" class="btn btn-primary" style="width:100%; margin-top:20px;">Confirm &
+                  WhatsApp</button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <!-- Hidden Templates -->
+    <template id="tpl-lab-card">
+      <article class="card pressable ripple" tabindex="0">
+        <figure class="media">
+          <img src="" alt="" />
+          <span class="distance">— km</span>
+          <div class="media-overlay">
+            <div class="overlay-row"><span class="pill ghost">Doctor ranked</span></div>
+          </div>
+        </figure>
+        <div class="body">
+          <div class="title-row">
+            <h3 class="title">Lab Name</h3><span class="pill soft doctor-tag">Doctor lens</span>
+          </div>
+          <div class="sub">Area • City</div>
+          <div class="meta-line"><span class="chip">Home ready</span><span class="chip">WhatsApp concierge</span></div>
+          <div class="badge-line">
+            <div class="mini-stat"><small>TAT</small><strong class="tat">12h</strong></div>
+            <div class="mini-stat"><small>Rating</small><strong class="rating">4.9</strong></div>
+          </div>
+          <div class="cta">
+            <button class="btn btn-primary btn-view">View</button>
+            <a class="btn btn-ghost btn-call">Call</a>
+          </div>
+        </div>
+      </article>
+    </template>
+    <template id="tpl-test-row">
+      <div class="test pressable ripple">
+        <label><input class="pick" type="checkbox" /><span class="tname">Test name</span></label>
+        <div class="price">₹0</div>
+      </div>
+    </template>
+
+  </div>
+
+  <!-- Scripts (Inline for Live Demo) -->
+  <script src="js/patient-os.js"></script>
+  <script src="js/localization.js"></script>
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      html.setAttribute('data-theme', html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    }
+
+    // --- MOCK DATA ---
+    const MOCK_LABS = [
+      { id: 1, name: "Apollo Diagnostics", area: "Indiranagar", dist: 1.2, tat: "6h", rating: 4.9, image: "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=400&q=80" },
+      { id: 2, name: "Thyrocare", area: "Koramangala", dist: 3.5, tat: "24h", rating: 4.5, image: "https://images.unsplash.com/photo-1581594693702-fbdc51b2763b?auto=format&fit=crop&w=400&q=80" },
+      { id: 3, name: "Metropolis", area: "Whitefield", dist: 8.0, tat: "12h", rating: 4.7, image: "https://images.unsplash.com/photo-1516549655169-df83a25a836f?auto=format&fit=crop&w=400&q=80" },
+      { id: 4, name: "Orange Health", area: "HSR Layout", dist: 4.2, tat: "60m", rating: 4.8, image: "https://images.unsplash.com/photo-1530497610245-94d3c16cda28?auto=format&fit=crop&w=400&q=80" }
+    ];
+
+    const MOCK_TESTS = [
+      { name: "CBC (Complete Blood Count)", price: 350 },
+      { name: "Lipid Profile", price: 550 },
+      { name: "Thyroid Profile (T3, T4, TSH)", price: 450 },
+      { name: "Vitamin B12", price: 900 },
+      { name: "HbA1c (Diabetes)", price: 400 },
+      { name: "Full Body Checkup (Advanced)", price: 2999 }
+    ];
+
+    // --- RENDER LOGIC ---
+    function renderLabs() {
+      const grid = document.getElementById('labGrid');
+      grid.innerHTML = '';
+      MOCK_LABS.forEach(lab => {
+        const card = document.createElement('article');
+        card.className = 'card pressable ripple';
+        card.onclick = () => openLabModal(lab);
+        card.innerHTML = `
+                <figure class="media">
+                    <img src="${lab.image}" alt="${lab.name}" />
+                    <span class="distance">${lab.dist} km</span>
+                    <div class="media-overlay">
+                        <div class="overlay-row"><span class="pill ghost">Doctor ranked</span></div>
+                    </div>
+                </figure>
+                <div class="body">
+                    <div class="title-row">
+                        <h3 class="title">${lab.name}</h3><span class="pill soft doctor-tag">Verified</span>
+                    </div>
+                    <div class="sub">${lab.area} • Bangalore</div>
+                    <div class="meta-line"><span class="chip">Home ready</span><span class="chip">WhatsApp concierge</span></div>
+                    <div class="badge-line">
+                        <div class="mini-stat"><small>TAT</small><strong class="tat">${lab.tat}</strong></div>
+                        <div class="mini-stat"><small>Rating</small><strong class="rating">${lab.rating}</strong></div>
+                    </div>
+                    <div class="cta">
+                        <button class="btn btn-primary btn-view">Book Test</button>
+                    </div>
+                </div>
+            `;
+        grid.appendChild(card);
+      });
+    }
+
+    function renderReports() {
+      const shelf = document.getElementById('labReportShelf');
+      shelf.innerHTML = `
+            <div class="report-card">
+                <div class="rep-icon"><i class="ph-fill ph-file-pdf"></i></div>
+                <div class="rep-info">
+                    <h4>Lipid Profile</h4>
+                    <span>Jan 24, 2024</span>
+                </div>
+                <button class="icon-btn"><i class="ph-bold ph-download-simple"></i></button>
+            </div>
+            <div class="report-card">
+                <div class="rep-icon"><i class="ph-fill ph-file-pdf"></i></div>
+                <div class="rep-info">
+                    <h4>Thyroid Panel</h4>
+                    <span>Dec 10, 2023</span>
+                </div>
+                <button class="icon-btn"><i class="ph-bold ph-download-simple"></i></button>
+            </div>
+            <div class="report-card">
+                <div class="rep-icon"><i class="ph-fill ph-file-pdf"></i></div>
+                <div class="rep-info">
+                    <h4>Vitamin D</h4>
+                    <span>Nov 05, 2023</span>
+                </div>
+                <button class="icon-btn"><i class="ph-bold ph-download-simple"></i></button>
+            </div>
+        `;
+    }
+
+    // --- MODAL & BOOKING ---
+    let cart = [];
+
+    function openLabModal(lab) {
+      const modal = document.getElementById('labModal');
+      document.getElementById('labTitle').innerText = lab.name;
+      document.getElementById('labAreaTxt').innerText = lab.area;
+      document.getElementById('labDistance').innerText = lab.dist + " km";
+      // Reset Cart
+      cart = [];
+      updateBookTab();
+
+      renderTests();
+
+      modal.classList.add('is-open');
+    }
+
+    function renderTests() {
+      const list = document.getElementById('bloodList');
+      list.innerHTML = '';
+      MOCK_TESTS.forEach(test => {
+        const row = document.createElement('div');
+        row.className = 'test pressable ripple';
+        row.innerHTML = `
+                <label style="display:flex; align-items:center; width:100%; cursor:pointer;">
+                    <input class="pick" type="checkbox" onchange="toggleTest('${test.name}', ${test.price}, this)" />
+                    <span class="tname" style="margin-left:10px; flex:1;">${test.name}</span>
+                    <div class="price">₹${test.price}</div>
+                </label>
+            `;
+        list.appendChild(row);
+      });
+    }
+
+    window.toggleTest = (name, price, checkbox) => {
+      if (checkbox.checked) {
+        cart.push({ name, price });
+      } else {
+        cart = cart.filter(i => i.name !== name);
+      }
+      updateBookTab();
+    }
+
+    function updateBookTab() {
+      const summary = document.getElementById('bookSummary');
+      const total = document.getElementById('bookTotal');
+
+      if (cart.length === 0) {
+        summary.innerHTML = "No tests selected";
+        total.innerText = "₹0";
+        return;
+      }
+
+      let html = '<ul style="padding-left:20px; font-size:13px;">';
+      let sum = 0;
+      cart.forEach(item => {
+        html += `<li>${item.name}</li>`;
+        sum += item.price;
+      });
+      html += '</ul>';
+
+      summary.innerHTML = html;
+      total.innerText = "₹" + sum;
+    }
+
+    // --- SETUP LISTENERS ---
+    document.addEventListener('DOMContentLoaded', () => {
+      renderLabs();
+      renderReports();
+
+      // Modal Close
+      document.getElementById('labClose').onclick = () => {
+        document.getElementById('labModal').classList.remove('is-open');
+      };
+
+      // Tabs
+      document.querySelectorAll('.tab').forEach(t => {
+        t.onclick = () => {
+          document.querySelectorAll('.tab').forEach(b => b.classList.remove('is-active'));
+          document.querySelectorAll('.panel').forEach(p => p.classList.remove('is-active'));
+
+          t.classList.add('is-active');
+          const pId = t.getAttribute('data-tab');
+          if (pId === 'book') document.getElementById('panel-book').classList.add('is-active');
+          if (pId === 'blood') document.getElementById('panel-blood').classList.add('is-active');
+          if (pId === 'radiology') document.getElementById('panel-rad').classList.add('is-active');
+        }
+      });
+
+      // Book Confirm
+      document.getElementById('btnBookConfirm').onclick = () => {
+        const btn = document.getElementById('btnBookConfirm');
+        if (cart.length === 0) {
+          showToast("Please select at least one test.");
+          return;
+        }
+
+        btn.innerHTML = `<i class="ph-bold ph-spinner spinner"></i> Processing...`;
+        setTimeout(() => {
+          btn.innerHTML = `Confirm & WhatsApp`;
+          document.getElementById('labModal').classList.remove('is-open');
+          showToast(`Booking Confirmed! Order #${Math.floor(Math.random() * 9000) + 1000}`);
+        }, 1500);
+      };
+    });
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.innerText = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+  </script>
+</body>
+
+</html>

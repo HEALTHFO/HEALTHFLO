@@ -1,0 +1,1561 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>HealthFlo - Health Dashboard</title>
+
+  <!-- Icons & Fonts -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <!-- Central OS -->
+  <script src="js/patient-os.js"></script>
+  <script src="js/localization.js"></script>
+  <script src="js/advanced-labs.js" defer></script>
+
+  <style>
+    /* --- CORE THEME VARIABLES (From Dashboard) --- */
+    :root {
+      --bg-radial: radial-gradient(circle at 20% 30%, #506176 0%, #1a1f2b 55%, #0E121B 100%);
+      --glass-bg: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-blur: blur(24px);
+      --text-main: #ffffff;
+      --text-muted: #94a3b8;
+      --text-inverse: #000000;
+      --color-blue: #0A84FF;
+      --color-yellow: #f59e0b;
+      --color-red: #ef4444;
+      --color-green: #10b981;
+      --color-purple: #8b5cf6;
+      --card-bg: rgba(22, 28, 38, 0.6);
+      --card-border: rgba(255, 255, 255, 0.05);
+      --card-active-bg: linear-gradient(135deg, rgba(30, 58, 138, 0.6) 0%, rgba(15, 23, 42, 0.8) 100%);
+      --sidebar-bg: rgba(255, 255, 255, 0.02);
+      --browser-bar-bg: rgba(0, 0, 0, 0.2);
+      --divider-color: rgba(255, 255, 255, 0.05);
+      --organ-item-bg: rgba(255, 255, 255, 0.01);
+      --organ-item-border: rgba(255, 255, 255, 0.08);
+      --organ-icon-color: #94a3b8;
+      --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.3);
+      --glow-color: rgba(10, 132, 255, 0.5);
+    }
+
+    [data-theme="light"] {
+      --bg-radial: linear-gradient(135deg, #f0f4f9 0%, #ffffff 100%);
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --text-inverse: #ffffff;
+      --color-blue: #3b82f6;
+      --color-yellow: #f59e0b;
+      --color-red: #ef4444;
+      --color-green: #10b981;
+      --color-purple: #8b5cf6;
+      --card-bg: rgba(255, 255, 255, 0.65);
+      --card-border: rgba(226, 232, 240, 0.8);
+      --card-active-bg: linear-gradient(135deg, #e0f2fe 0%, #ffffff 100%);
+      --glass-bg: rgba(255, 255, 255, 0.5);
+      --glass-border: rgba(0, 0, 0, 0.06);
+      --glass-blur: blur(24px);
+      --sidebar-bg: rgba(255, 255, 255, 0.7);
+      --browser-bar-bg: rgba(255, 255, 255, 0.8);
+      --divider-color: rgba(0, 0, 0, 0.06);
+      --organ-item-bg: #ffffff;
+      --organ-item-border: rgba(0, 0, 0, 0.05);
+      --organ-icon-color: #64748b;
+      --shadow-soft: 0 10px 30px rgba(148, 163, 184, 0.15);
+      --glow-color: rgba(59, 130, 246, 0.3);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', 'Plus Jakarta Sans', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(100, 100, 100, 0.2);
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(100, 100, 100, 0.3);
+    }
+
+    body {
+      height: 100vh;
+      width: 100vw;
+      background: var(--bg-radial);
+      overflow: hidden;
+      user-select: none;
+      color: var(--text-main);
+    }
+
+    .app-container {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .browser-bar {
+      height: 60px;
+      display: flex;
+      align-items: center;
+      padding: 0 32px;
+      gap: 24px;
+      border-bottom: 1px solid var(--glass-border);
+      background: var(--browser-bar-bg);
+      backdrop-filter: blur(10px);
+      z-index: 20;
+      flex-shrink: 0;
+    }
+
+    .window-controls {
+      display: flex;
+      gap: 8px;
+      margin-right: 12px;
+    }
+
+    .window-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      opacity: 0.8;
+    }
+
+    .branding-right {
+      margin-left: auto;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: 1px;
+      font-size: 14px;
+      opacity: 0.8;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .branding-right span {
+      color: var(--color-blue);
+      text-shadow: 0 0 10px var(--glow-color);
+    }
+
+    .sync-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 12px;
+      background: rgba(59, 130, 246, 0.12);
+      color: var(--color-blue);
+      font-size: 11px;
+      font-weight: 700;
+      border: 1px solid rgba(59, 130, 246, 0.25);
+      box-shadow: 0 6px 18px rgba(59, 130, 246, 0.15);
+    }
+
+    .sync-pill .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--color-green);
+      box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+      animation: breathe 2.4s ease-in-out infinite;
+    }
+
+    .theme-toggle {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--glass-border);
+      border: 1px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-muted);
+      margin-left: 10px;
+    }
+
+    .theme-toggle:hover {
+      background: var(--glass-bg);
+      color: var(--text-main);
+    }
+
+    .dashboard-body {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .sidebar {
+      width: 120px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 32px 0;
+      gap: 18px;
+      border-right: 1px solid var(--glass-border);
+      z-index: 10;
+      background: var(--sidebar-bg);
+      backdrop-filter: var(--glass-blur);
+      flex-shrink: 0;
+    }
+
+    .logo {
+      font-weight: 800;
+      color: var(--text-main);
+      font-size: 24px;
+      letter-spacing: -1px;
+      margin-bottom: 12px;
+    }
+
+    .logo span {
+      color: var(--color-blue);
+    }
+
+    .menu-item {
+      width: 90px;
+      height: 74px;
+      border-radius: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: var(--text-muted);
+      font-size: 22px;
+      cursor: pointer;
+      transition: 0.3s;
+      border: 1px solid transparent;
+      text-decoration: none;
+      flex-direction: column;
+      gap: 6px;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .menu-item:hover {
+      color: var(--text-main);
+      background: var(--glass-bg);
+      border-color: var(--glass-border);
+    }
+
+    .menu-item.active {
+      background: var(--glass-border);
+      color: var(--color-blue);
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--glass-border);
+    }
+
+    .menu-item.danger {
+      color: #ef4444;
+    }
+
+    .menu-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: inherit;
+      letter-spacing: 0.2px;
+    }
+
+    .sidebar-divider {
+      width: 60%;
+      height: 1px;
+      background: var(--divider-color);
+      margin: 6px auto;
+      opacity: 0.6;
+    }
+
+    .main-content {
+      flex: 1;
+      padding: 30px 40px;
+      overflow-y: auto;
+      position: relative;
+      padding-bottom: 100px;
+      display: block;
+    }
+
+    .header-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 30px;
+      z-index: 5;
+    }
+
+    .page-title h2 {
+      font-size: 18px;
+      color: var(--color-blue);
+      margin-bottom: 5px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .page-title h1 {
+      font-size: 56px;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1;
+      letter-spacing: -2px;
+    }
+
+    .page-title h1 span {
+      font-weight: 300;
+      opacity: 0.8;
+    }
+
+    .section-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin: 40px 0 20px 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section-title i {
+      color: var(--color-blue);
+    }
+
+    /* ===== HEALTH DASHBOARD SPECIFIC COMPONENTS ===== */
+    .med-section {
+      margin-top: 36px;
+    }
+
+    .med-shell {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 24px;
+    }
+
+    .med-hero {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .med-hero h3 {
+      margin: 0;
+      font-size: 18px;
+      color: white;
+    }
+
+    .med-hero p {
+      margin: 4px 0 0 0;
+      opacity: 0.7;
+      font-size: 13px;
+    }
+
+    .med-hero .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+      text-decoration: none;
+    }
+
+    .pill.primary-link {
+      background: linear-gradient(135deg, var(--color-blue), var(--color-purple));
+      color: white;
+      border: none;
+    }
+
+    .pill.soft-link {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--glass-border);
+      color: white;
+    }
+
+    .pill.ghost {
+      background: transparent;
+      border: 1px solid var(--glass-border);
+      color: var(--text-muted);
+    }
+
+    .pill:hover {
+      transform: translateY(-2px);
+    }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .tile {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      padding: 16px;
+    }
+
+    .timeline-lite {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+    }
+
+    .time-slot {
+      min-width: 180px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 12px;
+      padding: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      transition: all 0.3s ease;
+    }
+
+    .time-slot:hover {
+      transform: translateY(-2px);
+      border-color: var(--color-blue);
+    }
+
+    .time-slot.due {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.05));
+      border-color: var(--color-yellow);
+    }
+
+    .time-slot.taken {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.18), rgba(16, 185, 129, 0.05));
+      border-color: var(--color-green);
+    }
+
+    .time-label {
+      font-size: 18px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 4px;
+    }
+
+    .med-pill-item {
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 10px;
+      margin-top: 6px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .pill-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--pill-color), var(--pill-color-dark));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: white;
+    }
+
+    .med-info {
+      flex: 1;
+    }
+
+    .med-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: white;
+    }
+
+    .med-dosage {
+      font-size: 11px;
+      opacity: 0.6;
+    }
+
+    .med-card-lite {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      padding: 16px;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 12px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .med-card-lite::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: var(--med-color);
+    }
+
+    .med-icon-large {
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--med-color), var(--med-color-dark));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      color: white;
+    }
+
+    .stock-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+    }
+
+    .stock-bar {
+      flex: 1;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .stock-fill {
+      height: 100%;
+      background: var(--stock-color);
+      width: var(--stock-level);
+      transition: width 0.5s ease;
+    }
+
+    .interaction-result {
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 12px;
+      border: 1px solid var(--glass-border);
+      margin-top: 10px;
+    }
+
+    /* Health Score Circle */
+    .health-score-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      width: 200px;
+      height: 200px;
+      margin: 0 auto;
+    }
+
+    .health-circle {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: conic-gradient(var(--color-green) 0deg, var(--color-green) calc(var(--score) * 3.6deg), rgba(255, 255, 255, 0.05) calc(var(--score) * 3.6deg), rgba(255, 255, 255, 0.05) 360deg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: scoreReveal 2s ease-out;
+      position: relative;
+    }
+
+    .health-circle::before {
+      content: '';
+      position: absolute;
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: var(--bg-radial);
+    }
+
+    .health-score-value {
+      position: relative;
+      z-index: 2;
+      font-size: 48px;
+      font-weight: 800;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .health-score-value small {
+      font-size: 12px;
+      opacity: 0.6;
+      font-weight: 500;
+    }
+
+    @keyframes scoreReveal {
+      from {
+        --score: 0;
+      }
+
+      to {
+        --score: var(--final-score);
+      }
+    }
+
+    /* Vitals Grid */
+    .vitals-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .vital-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 20px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .vital-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--color-blue), var(--color-purple));
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .vital-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+      border-color: rgba(59, 130, 246, 0.5);
+    }
+
+    .vital-card:hover::before {
+      opacity: 1;
+    }
+
+    .vital-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .vital-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      opacity: 0.7;
+      font-weight: 600;
+    }
+
+    .vital-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: rgba(59, 130, 246, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-blue);
+      font-size: 18px;
+    }
+
+    .vital-value {
+      font-size: 32px;
+      font-weight: 800;
+      color: white;
+      margin-bottom: 8px;
+    }
+
+    .vital-value small {
+      font-size: 14px;
+      opacity: 0.6;
+      font-weight: 500;
+      margin-left: 4px;
+    }
+
+    .vital-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--color-green);
+      width: fit-content;
+    }
+
+    .vital-status.warning {
+      background: rgba(245, 158, 11, 0.1);
+      color: var(--color-yellow);
+    }
+
+    .vital-status.critical {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--color-red);
+    }
+
+    .insight-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .insight-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: rgba(59, 130, 246, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: var(--color-blue);
+    }
+
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .action-btn {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      color: white;
+      text-decoration: none;
+    }
+
+    .action-btn:hover {
+      background: rgba(59, 130, 246, 0.1);
+      border-color: var(--color-blue);
+      transform: translateX(4px);
+    }
+
+    .action-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--color-blue), var(--color-purple));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .action-text strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 2px;
+    }
+
+    .action-text small {
+      font-size: 11px;
+      opacity: 0.6;
+    }
+
+    .chart-card {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-top: 20px;
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .chart-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: white;
+    }
+
+    .chart-tabs {
+      display: flex;
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 4px;
+      border-radius: 10px;
+    }
+
+    .chart-tab {
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: transparent;
+      color: var(--text-muted);
+      border: none;
+    }
+
+    .chart-tab.active {
+      background: var(--color-blue);
+      color: white;
+    }
+
+    .risk-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+
+    .risk-card {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .risk-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: var(--risk-color);
+    }
+
+    .risk-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+
+    .risk-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: white;
+      margin-bottom: 4px;
+    }
+
+    .risk-badge {
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      background: var(--risk-color);
+      color: white;
+    }
+
+    .risk-bar {
+      height: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 12px;
+    }
+
+    .risk-fill {
+      height: 100%;
+      background: var(--risk-color);
+      width: var(--risk-level);
+    }
+
+    @media (max-width: 1200px) {
+      .sidebar {
+        display: none;
+      }
+
+      .vitals-grid,
+      .risk-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* SOAP NOTE STYLES */
+    .soap-note {
+      margin-top: 20px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid var(--glass-border);
+      display: none;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .soap-section {
+      margin-bottom: 15px;
+    }
+
+    .soap-label {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--color-blue);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .soap-content {
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--text-main);
+      opacity: 0.9;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app-container">
+    <!-- BROWSER BAR (Replicated) -->
+    <div class="browser-bar">
+      <div class="window-controls">
+        <div class="window-dot" style="background: #ef4444;"></div>
+        <div class="window-dot" style="background: #f59e0b;"></div>
+        <div class="window-dot" style="background: #10b981;"></div>
+      </div>
+      <div class="branding-right">
+        <span data-i18n="app_name">HealthFlo</span>
+        <span data-i18n="subtitle">CLINICAL V3</span>
+      </div>
+
+      <div class="sync-pill" id="sync-pill">
+        <div class="dot"></div>
+        <div>
+          <div style="font-size:10px; opacity:0.7;">Network Sync</div>
+          <div style="font-size:12px; font-weight:800;" id="sync-status">Live</div>
+        </div>
+      </div>
+
+      <div style="margin-left:auto; display:flex; gap:10px;">
+        <select id="lang-select" onchange="window.setLang(this.value)"
+          style="background:var(--glass-bg); color:var(--text-main); border:1px solid var(--glass-border); padding:6px; border-radius:8px; width:80px;">
+          <option value="en">ENG</option>
+          <option value="ta">தமிழ்</option>
+          <option value="hi">हिंदी</option>
+          <option value="ml">മലയാളം</option>
+          <option value="kn">ಕನ್ನಡ</option>
+          <option value="te">తెలుగు</option>
+        </select>
+        <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Light/Dark Mode">
+          <i class="ph-bold ph-sun"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="dashboard-body">
+      <!-- SIDEBAR -->
+      <div class="sidebar">
+        <div class="logo">H<span>+</span></div>
+        <a class="menu-item" href="patient-dashboard.html">
+          <i class="ph-fill ph-heartbeat"></i>
+          <span class="menu-label" data-i18n="nav_dashboard">Dashboard</span>
+        </a>
+        <a class="menu-item active" href="patient-health.html">
+          <i class="ph-bold ph-pulse"></i>
+          <span class="menu-label" data-i18n="nav_health">Health</span>
+        </a>
+        <a class="menu-item" href="patient-organs.html">
+          <i class="ph-bold ph-scan"></i>
+          <span class="menu-label" data-i18n="nav_organs">Organs</span>
+        </a>
+        <a class="menu-item" href="patient-labs.html">
+          <i class="ph ph-flask"></i>
+          <span class="menu-label" data-i18n="nav_labs">Labs</span>
+        </a>
+        <a class="menu-item" href="patient-pharmacy.html">
+          <i class="ph ph-pill"></i>
+          <span class="menu-label" data-i18n="nav_pharmacy">Pharmacy</span>
+        </a>
+        <a class="menu-item" href="patient-hospitals.html">
+          <i class="ph ph-hospital"></i>
+          <span class="menu-label" data-i18n="nav_hospitals">Hospitals</span>
+        </a>
+        <a class="menu-item" href="patient-insurance.html">
+          <i class="ph ph-shield-plus"></i>
+          <span class="menu-label" data-i18n="nav_insurance">Insurance</span>
+        </a>
+        <a class="menu-item" href="patient-devices.html">
+          <i class="ph ph-watch"></i>
+          <span class="menu-label" data-i18n="nav_devices">Devices</span>
+        </a>
+        <a class="menu-item" href="patient-family.html">
+          <i class="ph ph-users"></i>
+          <span class="menu-label" data-i18n="nav_family">Family</span>
+        </a>
+        <a class="menu-item" href="patient-profile.html">
+          <i class="ph ph-user"></i>
+          <span class="menu-label" data-i18n="nav_profile">Profile</span>
+        </a>
+        <div class="sidebar-divider"></div>
+        <a class="menu-item" href="patient-settings.html">
+          <i class="ph ph-gear-six"></i>
+          <span class="menu-label" data-i18n="nav_settings">Settings</span>
+        </a>
+        <a class="menu-item danger" href="index.html" style="margin-top: auto;">
+          <i class="ph ph-power"></i>
+          <span class="menu-label" data-i18n="nav_exit">Exit</span>
+        </a>
+      </div>
+
+      <div class="main-content">
+        <div class="header-section">
+          <div class="header-left">
+            <div class="page-title">
+              <h2>Status & Vitals</h2>
+              <h1>Health <span>Dashboard</span></h1>
+            </div>
+          </div>
+        </div>
+
+        <!-- Health Score Hero -->
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 24px; margin-top: 30px;">
+          <div
+            style="background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 20px; padding: 30px; text-align: center;">
+            <div style="margin-bottom: 20px;">
+              <span
+                style="background: rgba(16, 185, 129, 0.1); color: var(--color-green); padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">
+                <i class="ph-fill ph-check-circle"></i> AI Monitored
+              </span>
+            </div>
+            <div class="health-score-container">
+              <div class="health-circle" style="--score: 0; --final-score: 87;">
+                <div class="health-score-value">
+                  <span id="health-score">87</span>
+                  <small>/100</small>
+                </div>
+              </div>
+            </div>
+            <h3 style="margin-top: 20px; font-size: 20px; color: white;">Overall Health Score</h3>
+            <p style="opacity: 0.6; font-size: 13px; margin-top: 8px;">Based on 24 health metrics</p>
+            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--glass-border);">
+              <div style="display: flex; justify-content: space-around; text-align: center;">
+                <div>
+                  <div style="font-size: 24px; font-weight: 700; color: var(--color-green);">92</div>
+                  <div style="font-size: 11px; opacity: 0.6;">Cardiovascular</div>
+                </div>
+                <div>
+                  <div style="font-size: 24px; font-weight: 700; color: var(--color-blue);">85</div>
+                  <div style="font-size: 11px; opacity: 0.6;">Metabolic</div>
+                </div>
+                <div>
+                  <div style="font-size: 24px; font-weight: 700; color: var(--color-purple);">84</div>
+                  <div style="font-size: 11px; opacity: 0.6;">Immunity</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- AI Health Insights -->
+          <div
+            style="background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 20px; padding: 30px;">
+            <div class="insight-header">
+              <div class="insight-icon"><i class="ph-fill ph-robot"></i></div>
+              <div style="flex: 1;">
+                <h3 style="font-size: 18px; color: white; margin: 0;">AI Health Guardian</h3>
+                <p style="font-size: 12px; opacity: 0.6; margin: 4px 0 0 0;">Real-time analysis powered by Gemini</p>
+              </div>
+              <span
+                style="background: rgba(16, 185, 129, 0.1); color: var(--color-green); padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 700;"><i
+                  class="ph-fill ph-pulse"></i> Live</span>
+            </div>
+            <div class="insight-content" id="ai-insight">
+              <p style="margin: 0; color: var(--text-main); line-height: 1.7;"><strong>Excellent Progress!</strong> Your
+                cardiovascular metrics show consistent improvement over the past week. Heart rate variability is
+                optimal, indicating good stress management. Blood pressure remains stable within healthy ranges.</p>
+              <p style="margin: 16px 0 0 0; color: var(--text-main); line-height: 1.7; opacity: 0.8;">💡
+                <strong>Recommendation:</strong> Continue your current exercise routine. Consider adding 10 minutes of
+                meditation daily to maintain low cortisol levels.
+              </p>
+            </div>
+
+            <!-- SOAP Note Container -->
+            <div class="soap-note" id="soap-note">
+              <div class="soap-section">
+                <span class="soap-label">S - Subjective</span>
+                <div class="soap-content">Patient reports feeling "energetic" with "improved sleep quality". Notes
+                  occasional mild fatigue in late evenings. No acute pain reported.</div>
+              </div>
+              <div class="soap-section">
+                <span class="soap-label">O - Objective</span>
+                <div class="soap-content">BP: 118/76 mmHg. HR: 72 bpm (Resting). SpO2: 98%. Sleep efficiency: 88%.
+                  Weight: 72.4kg (Stable).</div>
+              </div>
+              <div class="soap-section">
+                <span class="soap-label">A - Assessment</span>
+                <div class="soap-content">Cardiovascular system stable and optimal. Slight elevation in evening fatigue
+                  likely linked to reported high beta-wave activity (stress). Metabolic markers are within normal
+                  limits.</div>
+              </div>
+              <div class="soap-section" style="margin-bottom:0;">
+                <span class="soap-label">P - Plan</span>
+                <div class="soap-content">1. maintain current hydration (2.5L/day).<br>2. Monitor evening fatigue;
+                  suggested 10min localized breathing exercise at 8 PM.<br>3. Follow up renal panel in 3 months.</div>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--glass-border);">
+            <div style="display: flex; gap: 12px;">
+              <button onclick="analyzeHealth()"
+                style="flex: 1; background: linear-gradient(135deg, var(--color-blue), var(--color-purple)); border: none; padding: 12px; border-radius: 10px; color: white; font-weight: 600; cursor: pointer; transition: transform 0.2s;"><i
+                  class="ph-bold ph-sparkle"></i> Deep Analysis</button>
+              <button
+                style="flex: 1; background: var(--glass-bg); border: 1px solid var(--glass-border); padding: 12px; border-radius: 10px; color: white; font-weight: 600; cursor: pointer; transition: transform 0.2s;"><i
+                  class="ph-bold ph-export"></i> Export Report</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Vitals -->
+      <div class="section-title"><i class="ph-fill ph-activity"></i> Live Vitals Monitoring</div>
+      <div class="vitals-grid">
+        <div class="vital-card">
+          <div class="vital-header"><span class="vital-label">Heart Rate</span>
+            <div class="vital-icon"><i class="ph-fill ph-heartbeat"></i></div>
+          </div>
+          <div class="vital-value" id="v-hr">72<small>bpm</small></div>
+          <div class="vital-status"><i class="ph-fill ph-check"></i> Normal</div>
+        </div>
+        <div class="vital-card">
+          <div class="vital-header"><span class="vital-label">Blood Pressure</span>
+            <div class="vital-icon"><i class="ph-fill ph-drop"></i></div>
+          </div>
+          <div class="vital-value" id="v-bp">118/76<small>mmHg</small></div>
+          <div class="vital-status"><i class="ph-fill ph-check"></i> Optimal</div>
+        </div>
+        <div class="vital-card">
+          <div class="vital-header"><span class="vital-label">Oxygen Saturation</span>
+            <div class="vital-icon"><i class="ph-fill ph-activity"></i></div>
+          </div>
+          <div class="vital-value" id="v-spo2">98<small>%</small></div>
+          <div class="vital-status"><i class="ph-fill ph-check"></i> Excellent</div>
+        </div>
+        <div class="vital-card">
+          <div class="vital-header"><span class="vital-label">Body Temperature</span>
+            <div class="vital-icon"><i class="ph-fill ph-thermometer"></i></div>
+          </div>
+          <div class="vital-value" id="v-temp">98.6<small>°F</small></div>
+          <div class="vital-status"><i class="ph-fill ph-check"></i> Normal</div>
+        </div>
+      </div>
+
+      <div class="section-title"><i class="ph-fill ph-circles-three-plus"></i> Organ System Status</div>
+      <div class="mini-grid" id="health-organ-grid"
+        style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+        <div class="tile" style="display:flex; gap:15px; align-items:center;">
+          <div class="organ-icon-box"
+            style="width:50px; height:50px; background:rgba(239, 68, 68, 0.1); border-radius:12px; display:flex; align-items:center; justify-content:center; color:#ef4444; font-size:24px;">
+            <i class="ph-fill ph-heart"></i>
+          </div>
+          <div style="flex:1;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <strong>Cardiovascular</strong>
+              <span style="color:#10b981; font-weight:700; font-size:12px;">OPTIMAL</span>
+            </div>
+            <div style="height:4px; background:rgba(255,255,255,0.1); border-radius:4px; overflow:hidden;">
+              <div style="width:92%; height:100%; background:#10b981;"></div>
+            </div>
+            <div style="font-size:11px; opacity:0.6; margin-top:4px;">BP: 118/76 • HR: 72 BPM</div>
+          </div>
+          <button
+            style="background:none; border:1px solid var(--glass-border); padding:8px; border-radius:8px; color:var(--text-muted); cursor:pointer;"
+            onclick="window.location.href='patient-health.html#organs'"><i class="ph-bold ph-caret-right"></i></button>
+        </div>
+
+        <div class="tile" style="display:flex; gap:15px; align-items:center;">
+          <div class="organ-icon-box"
+            style="width:50px; height:50px; background:rgba(59, 130, 246, 0.1); border-radius:12px; display:flex; align-items:center; justify-content:center; color:#3b82f6; font-size:24px;">
+            <i class="ph-fill ph-lungs"></i>
+          </div>
+          <div style="flex:1;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <strong>Respiratory</strong>
+              <span style="color:#10b981; font-weight:700; font-size:12px;">GOOD</span>
+            </div>
+            <div style="height:4px; background:rgba(255,255,255,0.1); border-radius:4px; overflow:hidden;">
+              <div style="width:98%; height:100%; background:#3b82f6;"></div>
+            </div>
+            <div style="font-size:11px; opacity:0.6; margin-top:4px;">SpO2: 98% • RR: 16</div>
+          </div>
+          <button
+            style="background:none; border:1px solid var(--glass-border); padding:8px; border-radius:8px; color:var(--text-muted); cursor:pointer;"
+            onclick="window.location.href='patient-health.html#organs'"><i class="ph-bold ph-caret-right"></i></button>
+        </div>
+
+        <div class="tile" style="display:flex; gap:15px; align-items:center;">
+          <div class="organ-icon-box"
+            style="width:50px; height:50px; background:rgba(139, 92, 246, 0.1); border-radius:12px; display:flex; align-items:center; justify-content:center; color:#8b5cf6; font-size:24px;">
+            <i class="ph-fill ph-brain"></i>
+          </div>
+          <div style="flex:1;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <strong>Nervous System</strong>
+              <span style="color:#f59e0b; font-weight:700; font-size:12px;">STRESS</span>
+            </div>
+            <div style="height:4px; background:rgba(255,255,255,0.1); border-radius:4px; overflow:hidden;">
+              <div style="width:75%; height:100%; background:#f59e0b;"></div>
+            </div>
+            <div style="font-size:11px; opacity:0.6; margin-top:4px;">Sleep: 6h 20m • HRV: Low</div>
+          </div>
+          <button
+            style="background:none; border:1px solid var(--glass-border); padding:8px; border-radius:8px; color:var(--text-muted); cursor:pointer;"
+            onclick="window.location.href='patient-health.html#organs'"><i class="ph-bold ph-caret-right"></i></button>
+        </div>
+      </div>
+
+      <div class="section-title"><i class="ph-fill ph-user-focus"></i> Complete Profile & Lifestyle</div>
+      <div class="mini-grid">
+        <div class="tile">
+          <p class="vital-label" style="margin: 0;">Body Composition</p>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px;">
+            <div><strong style="color: var(--text-main);">72.4 kg</strong><br><small>Weight</small></div>
+            <div><strong style="color: var(--text-main);">176 cm</strong><br><small>Height</small></div>
+            <div><strong style="color: var(--text-main);">23.3</strong><br><small>BMI (Healthy)</small></div>
+          </div>
+        </div>
+        <div class="tile">
+          <p class="vital-label" style="margin: 0;">Allergies & Blood Group</p>
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 12px;">
+            <div class="med-pill-item" style="--pill-color:#f59e0b; --pill-color-dark:#b45309;">
+              <div class="pill-icon">🥜</div>
+              <div class="med-info">
+                <div class="med-name" style="color: white;">Peanut allergy</div>
+                <div class="med-dosage">Carry epinephrine</div>
+              </div>
+            </div>
+            <div class="med-pill-item" style="--pill-color:#ef4444; --pill-color-dark:#b91c1c;">
+              <div class="pill-icon">💊</div>
+              <div class="med-info">
+                <div class="med-name" style="color: white;">Penicillin sensitivity</div>
+                <div class="med-dosage">Flagged</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tile">
+          <p class="vital-label" style="margin: 0;">History & Confidential Notes</p>
+          <ul style="margin: 10px 0 0 18px; line-height: 1.5; color: var(--text-main);">
+            <li>Past medical: Mild asthma (childhood), GERD</li>
+            <li>Past surgical: Appendectomy (2015)</li>
+          </ul>
+        </div>
+        <div class="section-title"><i class="ph-fill ph-dna"></i> Genetics & Nutrition</div>
+        <div class="mini-grid">
+          <div class="tile">
+            <p class="vital-label" style="margin: 0;">Genetic Profile</p>
+            <div style="margin-top:10px;">
+              <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px;">
+                <span>Metabolism Type</span>
+                <strong style="color:white;">Fast Oxidizer</strong>
+              </div>
+              <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px;">
+                <span>Carb Sensitivity</span>
+                <strong style="color:var(--color-yellow);">Moderate</strong>
+              </div>
+              <div style="display:flex; justify-content:space-between; font-size:13px;">
+                <span>Caffeine</span>
+                <strong style="color:var(--color-green);">Fast metabolizer</strong>
+              </div>
+            </div>
+          </div>
+          <div class="tile">
+            <p class="vital-label" style="margin: 0;">Nutritional Deficiencies</p>
+            <div style="margin-top:10px; display:flex; flex-wrap:wrap; gap:8px;">
+              <span class="med-pill-item"
+                style="padding:4px 10px; font-size:12px; margin:0; --pill-color:#ef4444; --pill-color-dark:#b91c1c;">
+                <span style="color:white; margin-right:4px;">Vitamin D3</span> <small style="opacity:0.7;">Low</small>
+              </span>
+              <span class="med-pill-item"
+                style="padding:4px 10px; font-size:12px; margin:0; --pill-color:#f59e0b; --pill-color-dark:#b45309;">
+                <span style="color:white; margin-right:4px;">Magnesium</span> <small
+                  style="opacity:0.7;">Borderline</small>
+              </span>
+            </div>
+          </div>
+          <div class="tile">
+            <p class="vital-label" style="margin: 0;">Dietary Plan</p>
+            <div style="margin-top:10px;">
+              <h4 style="color:var(--color-blue); margin-bottom:4px;">Mediterranean (Modified)</h4>
+              <p style="font-size:12px; opacity:0.7; line-height:1.4;">High healthy fats, moderate protein. Focus on
+                leafy greens and omega-3s.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-title"><i class="ph-fill ph-chart-line"></i> Health Trends</div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <div class="chart-title">7-Day Vitals Overview</div>
+            <div class="chart-tabs">
+              <button class="chart-tab active" onclick="switchChart('week')">Week</button>
+              <button class="chart-tab" onclick="switchChart('month')">Month</button>
+              <button class="chart-tab" onclick="switchChart('year')">Year</button>
+            </div>
+          </div>
+          <canvas id="trend-chart" height="80"></canvas>
+        </div>
+
+        <!-- Reuse rest of content structure for Risk, Meds, Actions... -->
+        <div class="section-title"><i class="ph-fill ph-pill"></i> Medication Management</div>
+        <div class="med-shell med-section">
+          <div class="med-hero">
+            <div>
+              <h3>Pharmacy Hub Preview</h3>
+              <p>Track doses, refill stock, and sync orders directly to the Pharmacy OS.</p>
+            </div>
+            <div class="actions">
+              <a class="pill primary-link" href="patient-pharmacy.html?from=health" id="open-pharmacy-link"><i
+                  class="ph-bold ph-shopping-cart"></i> Order via Pharmacy</a>
+            </div>
+          </div>
+          <div class="mini-grid">
+            <div class="tile">
+              <p class="vital-label">Today</p><strong>Medication Timeline</strong>
+              <div class="timeline-lite" id="timeline"></div>
+            </div>
+            <div class="tile">
+              <p class="vital-label">Active</p><strong>Medications & Stock</strong>
+              <div id="meds-grid" style="display: grid; grid-template-columns: 1fr; gap: 12px;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-title" style="margin-top: 32px;"><i class="ph-fill ph-lightning"></i> Quick Actions</div>
+        <div class="quick-actions">
+          <a href="patient-labs.html" class="action-btn">
+            <div class="action-icon"><i class="ph-bold ph-upload-simple"></i></div>
+            <div class="action-text"><strong>Upload Lab Results</strong><small>PDF, JPG supported</small></div>
+          </a>
+          <a href="patient-organs.html" class="action-btn">
+            <div class="action-icon"><i class="ph-bold ph-scan"></i></div>
+            <div class="action-text"><strong>Organ Health Check</strong><small>Full body scan</small></div>
+          </a>
+          <a href="patient-hospitals.html" class="action-btn">
+            <div class="action-icon"><i class="ph-bold ph-calendar-plus"></i></div>
+            <div class="action-text"><strong>Book Appointment</strong><small>Find nearby</small></div>
+          </a>
+        </div>
+
+        <div class="section-title" style="margin-top: 36px;"><i class="ph-bold ph-flask"></i> Advanced Lab Sync</div>
+        <section class="advanced-labs" data-page="health"></section>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script type="module">
+    import { DemoUsers, injectDemoData } from './js/demo-data.js';
+    import { MedicalBrain } from './js/medical-brain.js';
+    const brain = new MedicalBrain();
+
+    const HEALTH_MEDS = [
+      { id: 1, name: 'Metformin', dosage: '500mg', frequency: 'Twice daily', times: ['08:00 AM', '08:00 PM'], stock: 28, color: '#3b82f6', colorDark: '#2563eb', category: 'Diabetes' },
+      { id: 2, name: 'Lisinopril', dosage: '10mg', frequency: 'Once daily', times: ['09:00 AM'], stock: 45, color: '#ef4444', colorDark: '#dc2626', category: 'Blood Pressure' },
+      { id: 3, name: 'Atorvastatin', dosage: '20mg', frequency: 'Once daily', times: ['10:00 PM'], stock: 12, color: '#8b5cf6', colorDark: '#7c3aed', category: 'Cholesterol' },
+      { id: 4, name: 'Aspirin', dosage: '81mg', frequency: 'Once daily', times: ['08:00 AM'], stock: 60, color: '#10b981', colorDark: '#059669', category: 'Cardio' }
+    ];
+
+    const HEALTH_TIME_SLOTS = [
+      { time: '08:00 AM', meds: [1, 4], status: 'taken' },
+      { time: '09:00 AM', meds: [2], status: 'taken' },
+      { time: '12:00 PM', meds: [], status: 'due' },
+      { time: '08:00 PM', meds: [1], status: 'upcoming' },
+      { time: '10:00 PM', meds: [3], status: 'upcoming' }
+    ];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      injectDemoData();
+      initChart();
+      startLiveVitals();
+      renderTimeline();
+      renderMedicationCards();
+      renderHealthOrgans();
+    });
+
+    function renderTimeline() {
+      const timeline = document.getElementById('timeline');
+      if (!timeline) return;
+      timeline.innerHTML = '';
+      HEALTH_TIME_SLOTS.forEach(slot => {
+        const div = document.createElement('div');
+        div.className = `time-slot ${slot.status}`;
+        div.innerHTML = `<div class="time-label">${slot.time}</div><div style="font-size:11px;opacity:0.6;">${slot.status}</div>`;
+        timeline.appendChild(div);
+      });
+    }
+
+    function renderHealthOrgans() {
+      const grid = document.getElementById('health-organ-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      const organs = window.PATIENT_OS.organs;
+      Object.entries(organs).forEach(([key, o]) => {
+        // Determine color based on simValue
+        const color = o.simValue > 60 ? '#10b981' : (o.simValue > 30 ? '#f59e0b' : '#ef4444');
+        const statusText = o.simValue > 60 ? 'OPTIMAL' : (o.simValue > 30 ? 'ATTENTION' : 'CRITICAL');
+
+        const card = document.createElement('div');
+        card.className = 'tile';
+        card.style.display = 'flex';
+        card.style.gap = '15px';
+        card.style.alignItems = 'center';
+        card.innerHTML = `
+          <div class="organ-icon-box"
+            style="width:50px; height:50px; background:rgba(255,255,255,0.05); border-radius:12px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:24px;">
+            <i class="ph-fill ${o.icon}"></i>
+          </div>
+          <div style="flex:1;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <strong>${window.t('organ_' + key.toLowerCase())}</strong>
+              <span style="color:${color}; font-weight:700; font-size:12px;">${statusText}</span>
+            </div>
+            <div style="height:4px; background:rgba(255,255,255,0.1); border-radius:4px; overflow:hidden;">
+              <div style="width:${o.simValue}%; height:100%; background:${color};"></div>
+            </div>
+            <div style="font-size:11px; opacity:0.6; margin-top:4px;">Efficiency: ${o.simValue}% • Risk: ${o.ai ? o.ai.risk + '%' : 'Low'}</div>
+          </div>
+          <button
+            style="background:none; border:1px solid var(--glass-border); padding:8px; border-radius:8px; color:var(--text-muted); cursor:pointer;"
+            onclick="window.location.href='patient-organs.html'"><i class="ph-bold ph-caret-right"></i></button>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function renderMedicationCards() {
+      const grid = document.getElementById('meds-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+      HEALTH_MEDS.forEach(med => {
+        const card = document.createElement('div');
+        card.className = 'med-card-lite';
+        card.style.setProperty('--med-color', med.color);
+        card.style.setProperty('--med-color-dark', med.colorDark);
+        card.innerHTML = `<div class="med-icon-large"><i class="ph-fill ph-pill"></i></div><div><h4 style="margin:0;color:white;">${med.name}</h4><p style="opacity:0.7;font-size:12px;margin:0;">${med.dosage}</p></div>`;
+        grid.appendChild(card);
+      });
+    }
+
+    function startLiveVitals() {
+      setInterval(() => {
+        document.getElementById('v-hr').innerHTML = (60 + Math.floor(Math.random() * 20)) + '<small>bpm</small>';
+      }, 3000);
+    }
+
+    function initChart() {
+      const ctx = document.getElementById('trend-chart');
+      if (ctx) {
+        new Chart(ctx.getContext('2d'), {
+          type: 'line',
+          data: {
+            labels: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
+            datasets: [{
+              label: 'Heart Rate',
+              data: [72, 68, 75, 70, 73, 69, 72],
+              borderColor: '#3b82f6',
+              backgroundColor: 'rgba(59, 130, 246, 0.1)',
+              fill: true
+            }]
+          },
+          options: { responsive: true, maintainAspectRatio: false }
+        });
+      }
+    }
+  </script>
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      html.setAttribute('data-theme', html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    }
+
+    function analyzeHealth() {
+      const note = document.getElementById('soap-note');
+      const insight = document.getElementById('ai-insight');
+      const btn = document.querySelector('button[onclick="analyzeHealth()"]');
+
+      if (note.style.display === 'block') {
+        note.style.display = 'none';
+        insight.style.display = 'block';
+        btn.innerHTML = '<i class="ph-bold ph-sparkle"></i> Deep Analysis';
+        btn.style.background = 'linear-gradient(135deg, var(--color-blue), var(--color-purple))';
+      } else {
+        insight.style.display = 'none';
+        // Simulate processing
+        btn.innerHTML = '<i class="ph-bold ph-spinner" style="animation:spin 1s infinite linear"></i> Generating SOAP...';
+        setTimeout(() => {
+          note.style.display = 'block';
+          btn.innerHTML = '<i class="ph-bold ph-check"></i> Standard View';
+          btn.style.background = 'var(--glass-bg)';
+        }, 800);
+      }
+    }
+  </script>
+</body>
+
+</html>

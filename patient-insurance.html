@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>HealthFlo - Insurance & Finance</title>
+
+  <!-- Icons & Fonts -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <style>
+    /* --- CORE THEME VARIABLES (From Dashboard) --- */
+    :root {
+      --bg-radial: radial-gradient(circle at 20% 30%, #506176 0%, #1a1f2b 55%, #0E121B 100%);
+      --glass-bg: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-blur: blur(24px);
+      --text-main: #ffffff;
+      --text-muted: #94a3b8;
+      --color-blue: #0A84FF;
+      --color-green: #10b981;
+      --color-yellow: #f59e0b;
+      --color-red: #ef4444;
+
+      --card-bg: rgba(22, 28, 38, 0.6);
+      --card-border: rgba(255, 255, 255, 0.05);
+
+      --sidebar-bg: rgba(255, 255, 255, 0.02);
+      --browser-bar-bg: rgba(0, 0, 0, 0.2);
+      --divider-color: rgba(255, 255, 255, 0.05);
+      --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    /* RESET & SCROLL */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', 'Plus Jakarta Sans', sans-serif;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(100, 100, 100, 0.2);
+      border-radius: 10px;
+    }
+
+    body {
+      height: 100vh;
+      width: 100vw;
+      background: var(--bg-radial);
+      overflow: hidden;
+      user-select: none;
+      color: var(--text-main);
+    }
+
+    .app-container {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* BROWSER BAR */
+    .browser-bar {
+      height: 60px;
+      display: flex;
+      align-items: center;
+      padding: 0 32px;
+      gap: 24px;
+      border-bottom: 1px solid var(--glass-border);
+      background: var(--browser-bar-bg);
+      backdrop-filter: blur(10px);
+      z-index: 20;
+      flex-shrink: 0;
+    }
+
+    .window-controls {
+      display: flex;
+      gap: 8px;
+      margin-right: 12px;
+    }
+
+    .window-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      opacity: 0.8;
+    }
+
+    .branding-right {
+      margin-left: auto;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: 1px;
+      font-size: 14px;
+      opacity: 0.8;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .branding-right span {
+      color: var(--color-blue);
+      text-shadow: 0 0 10px rgba(10, 132, 255, 0.5);
+    }
+
+    .theme-toggle {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--glass-border);
+      border: 1px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-muted);
+      margin-left: 10px;
+    }
+
+    /* LAYOUT */
+    .dashboard-body {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 120px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 32px 0;
+      gap: 18px;
+      border-right: 1px solid var(--glass-border);
+      z-index: 10;
+      background: var(--sidebar-bg);
+      backdrop-filter: var(--glass-blur);
+      flex-shrink: 0;
+    }
+
+    .logo {
+      font-weight: 800;
+      color: var(--text-main);
+      font-size: 24px;
+      letter-spacing: -1px;
+      margin-bottom: 12px;
+    }
+
+    .logo span {
+      color: var(--color-blue);
+    }
+
+    .menu-item {
+      width: 90px;
+      height: 74px;
+      border-radius: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: var(--text-muted);
+      font-size: 22px;
+      cursor: pointer;
+      transition: 0.3s;
+      border: 1px solid transparent;
+      text-decoration: none;
+      flex-direction: column;
+      gap: 6px;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .menu-item:hover {
+      color: var(--text-main);
+      background: var(--glass-bg);
+      border-color: var(--glass-border);
+    }
+
+    .menu-item.active {
+      background: var(--glass-border);
+      color: var(--color-blue);
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--glass-border);
+    }
+
+    .menu-item.danger {
+      color: #ef4444;
+    }
+
+    .menu-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: inherit;
+      letter-spacing: 0.2px;
+    }
+
+    .sidebar-divider {
+      width: 60%;
+      height: 1px;
+      background: var(--divider-color);
+      margin: 6px auto;
+      opacity: 0.6;
+    }
+
+    /* MAIN */
+    .main-content {
+      flex: 1;
+      padding: 30px 40px;
+      overflow-y: auto;
+      position: relative;
+      padding-bottom: 100px;
+    }
+
+    .header-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 30px;
+    }
+
+    .page-title h2 {
+      font-size: 18px;
+      color: var(--color-blue);
+      margin-bottom: 5px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .page-title h1 {
+      font-size: 48px;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1;
+      letter-spacing: -2px;
+    }
+
+    .page-title h1 span {
+      font-weight: 300;
+      opacity: 0.8;
+    }
+
+    /* Insurance Cards */
+    .module-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 28px;
+      padding: 24px;
+      margin-bottom: 24px;
+      backdrop-filter: blur(20px);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .section-header {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--color-blue);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .blue-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--color-blue);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--color-blue);
+    }
+
+    /* Grid */
+    .insurance-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .policy-card {
+      background: linear-gradient(135deg, rgba(30, 58, 138, 0.4) 0%, rgba(15, 23, 42, 0.6) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .policy-card::before {
+      content: '';
+      position: absolute;
+      top: -50px;
+      right: -50px;
+      width: 150px;
+      height: 150px;
+      background: radial-gradient(circle, rgba(10, 132, 255, 0.2) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .policy-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .insurer-logo {
+      font-size: 16px;
+      font-weight: 800;
+      color: white;
+      letter-spacing: -0.5px;
+    }
+
+    .policy-badge {
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 10px;
+      font-weight: 700;
+      background: rgba(16, 185, 129, 0.2);
+      color: #10b981;
+    }
+
+    .policy-num {
+      font-family: monospace;
+      font-size: 20px;
+      letter-spacing: 2px;
+      color: white;
+      margin-bottom: 24px;
+      opacity: 0.9;
+    }
+
+    .policy-stats {
+      display: flex;
+      gap: 20px;
+    }
+
+    .p-stat small {
+      display: block;
+      font-size: 10px;
+      opacity: 0.6;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
+
+    .p-stat strong {
+      font-size: 16px;
+    }
+
+    /* Forms */
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    .form-input,
+    .form-select {
+      width: 100%;
+      padding: 12px;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      color: var(--text-main);
+      font-size: 13px;
+      outline: none;
+      transition: 0.3s;
+    }
+
+    .form-input:focus,
+    .form-select:focus {
+      border-color: var(--color-blue);
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    .cta-btn {
+      width: 100%;
+      padding: 14px;
+      background: var(--color-blue);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.3s;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .cta-btn:hover {
+      filter: brightness(1.1);
+      transform: translateY(-2px);
+    }
+
+    /* Claims Timeline */
+    .claims-track {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .track-item {
+      display: flex;
+      gap: 16px;
+      opacity: 0.6;
+    }
+
+    .track-item.active {
+      opacity: 1;
+    }
+
+    .track-dot {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--glass-border);
+      border: 2px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: var(--text-muted);
+      position: relative;
+      z-index: 1;
+    }
+
+    .track-item.active .track-dot {
+      background: var(--color-blue);
+      border-color: var(--color-blue);
+      color: white;
+      box-shadow: 0 0 10px var(--color-blue);
+    }
+
+    .track-item:not(:last-child) .track-dot::after {
+      content: '';
+      position: absolute;
+      top: 22px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2px;
+      height: 30px;
+      background: var(--glass-border);
+      z-index: 0;
+    }
+
+    .track-content h4 {
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+
+    .track-content p {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="app-container">
+    <!-- Browser Bar -->
+    <div class="browser-bar">
+      <div class="window-controls">
+        <div class="window-dot" style="background: #ef4444;"></div>
+        <div class="window-dot" style="background: #f59e0b;"></div>
+        <div class="window-dot" style="background: #10b981;"></div>
+      </div>
+      <div class="branding-right">
+        <span data-i18n="app_name">HealthFlo</span>
+        <span data-i18n="subtitle">CLINICAL V3</span>
+      </div>
+
+      <div style="margin-left:auto; display:flex; gap:10px;">
+        <select id="lang-select" onchange="window.setLang(this.value)"
+          style="background:var(--glass-bg); color:var(--text-main); border:1px solid var(--glass-border); padding:6px; border-radius:8px; width:80px;">
+          <option value="en">ENG</option>
+          <option value="ta">தமிழ்</option>
+          <option value="hi">हिंदी</option>
+          <option value="ml">മലയാളം</option>
+          <option value="kn">ಕನ್ನಡ</option>
+          <option value="te">తెలుగు</option>
+        </select>
+        <button class="theme-toggle" onclick="toggleTheme()"><i class="ph-bold ph-sun"></i></button>
+      </div>
+    </div>
+
+    <div class="dashboard-body">
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <div class="logo">H<span>+</span></div>
+        <a class="menu-item" href="patient-dashboard.html">
+          <i class="ph ph-heartbeat"></i>
+          <span class="menu-label" data-i18n="nav_dashboard">Dashboard</span>
+        </a>
+        <a class="menu-item" href="patient-health.html">
+          <i class="ph ph-pulse"></i>
+          <span class="menu-label" data-i18n="nav_health">Health</span>
+        </a>
+        <a class="menu-item" href="patient-organs.html">
+          <i class="ph-bold ph-scan"></i>
+          <span class="menu-label" data-i18n="nav_organs">Organs</span>
+        </a>
+        <a class="menu-item" href="patient-labs.html">
+          <i class="ph ph-flask"></i>
+          <span class="menu-label" data-i18n="nav_labs">Labs</span>
+        </a>
+        <a class="menu-item" href="patient-pharmacy.html">
+          <i class="ph ph-pill"></i>
+          <span class="menu-label" data-i18n="nav_pharmacy">Pharmacy</span>
+        </a>
+        <a class="menu-item" href="patient-hospitals.html">
+          <i class="ph ph-hospital"></i>
+          <span class="menu-label" data-i18n="nav_hospitals">Hospitals</span>
+        </a>
+        <a class="menu-item active" href="patient-insurance.html">
+          <i class="ph-fill ph-shield-plus"></i>
+          <span class="menu-label" data-i18n="nav_insurance">Insurance</span>
+        </a>
+        <a class="menu-item" href="patient-devices.html">
+          <i class="ph ph-watch"></i>
+          <span class="menu-label" data-i18n="nav_devices">Devices</span>
+        </a>
+        <a class="menu-item" href="patient-family.html">
+          <i class="ph ph-users"></i>
+          <span class="menu-label" data-i18n="nav_family">Family</span>
+        </a>
+        <a class="menu-item" href="patient-profile.html">
+          <i class="ph ph-user"></i>
+          <span class="menu-label" data-i18n="nav_profile">Profile</span>
+        </a>
+        <div class="sidebar-divider"></div>
+        <a class="menu-item" href="patient-settings.html">
+          <i class="ph ph-gear-six"></i>
+          <span class="menu-label" data-i18n="nav_settings">Settings</span>
+        </a>
+        <a class="menu-item danger" href="index.html" style="margin-top: auto;">
+          <i class="ph ph-power"></i>
+          <span class="menu-label" data-i18n="nav_exit">Exit</span>
+        </a>
+      </div>
+
+      <!-- Main Content -->
+      <div class="main-content">
+        <div class="header-section">
+          <div class="header-left">
+            <div class="page-title">
+              <h2>Claims & Finance</h2>
+              <h1>Insurance <span>Vault</span></h1>
+            </div>
+          </div>
+          <div class="header-right">
+            <button class="cta-btn" style="width:auto; padding:10px 20px;"
+              onclick="window.location.href='patient-hospitals.html'"><i class="ph-bold ph-plus"></i> New Claim</button>
+          </div>
+        </div>
+
+        <div class="insurance-grid" style="margin-bottom: 30px;">
+          <!-- Policy Card -->
+          <div class="policy-card">
+            <div class="policy-header">
+              <div class="insurer-logo">STAR HEALTH</div>
+              <div class="policy-badge">ACTIVE</div>
+            </div>
+            <div class="policy-num">P/1298/8871/22</div>
+            <div class="policy-stats">
+              <div class="p-stat"><small>Sum Insured</small><strong>₹10,00,000</strong></div>
+              <div class="p-stat"><small>Balance</small><strong>₹8,45,000</strong></div>
+              <div class="p-stat"><small>Expiring</small><strong>Nov 2025</strong></div>
+            </div>
+          </div>
+
+          <!-- Claim Status -->
+          <div class="module-card" style="margin:0; padding:20px;">
+            <div class="section-header"><i class="ph-bold ph-trend-up"></i> Active Claim Status</div>
+            <div class="claims-track">
+              <div class="track-item active">
+                <div class="track-dot"><i class="ph-bold ph-check"></i></div>
+                <div class="track-content">
+                  <h4>Claim Intimated</h4>
+                  <p>Hospital: Apollo Bannerghatta</p>
+                </div>
+              </div>
+              <div class="track-item active">
+                <div class="track-dot"><i class="ph-bold ph-check"></i></div>
+                <div class="track-content">
+                  <h4>Documents Uploaded</h4>
+                  <p>Synced from Digital Locker</p>
+                </div>
+              </div>
+              <div class="track-item">
+                <div class="track-dot" style="animation:pulse 2s infinite;"><i class="ph-bold ph-clock"></i></div>
+                <div class="track-content">
+                  <h4 style="color:var(--color-blue);">Processing Approval</h4>
+                  <p>TPA: MediAssist • ETA 2 Hours</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- NEW: Coverage & Audit Section -->
+        <h3
+          style="margin-bottom:16px; font-size:16px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px;">
+          Policy Analysis & Tools</h3>
+
+        <div class="insurance-grid">
+          <!-- 1. Coverage Validator -->
+          <div class="module-card">
+            <div class="section-header">
+              <div class="blue-dot"></div> Coverage Estimator
+            </div>
+            <p style="font-size:12px; color:var(--text-muted); margin-bottom:16px;">
+              Analyze bill against policy to find hidden non-payables.
+            </p>
+            <div class="form-group">
+              <label class="form-label">Estimated Bill Amount</label>
+              <input type="number" id="estInput" class="form-input" placeholder="₹ Enter sum">
+            </div>
+            <button class="cta-btn" onclick="analyzeCover()"><i class="ph-bold ph-calculator"></i> Validate
+              Coverage</button>
+
+            <div id="cover-result" style="display:none; margin-top:20px;">
+              <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:13px;">
+                <span>Wait Period:</span> <strong style="color:var(--color-green);">Cleared</strong>
+              </div>
+              <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:13px;">
+                <span>Room Rent Capping:</span> <strong style="color:#f59e0b;">1% of SI</strong>
+              </div>
+              <div
+                style="background:rgba(239,68,68,0.1); padding:12px; border-radius:8px; border:1px solid rgba(239,68,68,0.2); margin-top:10px;">
+                <div style="font-size:11px; color:#ef4444; font-weight:700; margin-bottom:4px;">NON-PAYABLES DETECTED
+                </div>
+                <ul style="font-size:12px; color:var(--text-muted); padding-left:16px;">
+                  <li>Consumables (Gloves, Masks)</li>
+                  <li>Admin Charges (Registration)</li>
+                </ul>
+                <div
+                  style="margin-top:8px; padding-top:8px; border-top:1px solid rgba(239,68,68,0.2); display:flex; justify-content:space-between; align-items:center;">
+                  <span style="font-size:12px;">Est. Pay Out:</span>
+                  <strong style="font-size:16px; color:#10b981;" id="payoutVal">₹0</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Audit & Quality -->
+          <div class="module-card">
+            <div class="section-header">
+              <div class="blue-dot" style="background:var(--color-purple);"></div> Bill Audit & Safety
+            </div>
+            <p style="font-size:12px; color:var(--text-muted); margin-bottom:16px;">
+              AI Scan for overbilling vs treatment protocols.
+            </p>
+            <div style="display:flex; gap:10px; margin-bottom:16px;">
+              <button class="cta-btn"
+                style="background:var(--glass-bg); border:1px solid var(--glass-border); font-size:12px;"
+                onclick="document.getElementById('fileUpload').click()">
+                <i class="ph-bold ph-upload-simple"></i> Upload Bill
+              </button>
+              <input type="file" id="fileUpload" hidden onchange="runAudit()" />
+            </div>
+
+            <div id="audit-result" style="display:none;">
+              <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+                <div
+                  style="width:30px; height:30px; border-radius:50%; background:rgba(16,185,129,0.2); color:#10b981; display:flex; align-items:center; justify-content:center;">
+                  <i class="ph-bold ph-check"></i>
+                </div>
+                <div>
+                  <div style="font-size:13px; font-weight:600;">98% Protocol Match</div>
+                  <div style="font-size:11px; color:var(--text-muted);">Treatment aligns with diagnosis</div>
+                </div>
+              </div>
+              <div style="font-size:12px; color:var(--text-muted); line-height:1.4;">
+                <i class="ph-fill ph-info" style="color:#0A84FF;"></i> <strong>Note:</strong> Pharmacy charges are 12%
+                higher than market median.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- NEW: Reimbursement Assistant -->
+        <h3
+          style="margin-bottom:16px; font-size:16px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px;">
+          Reimbursement Assistant</h3>
+        <div class="module-card">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <div class="section-header" style="margin:0;"><i class="ph-bold ph-files"></i> Document Checklist</div>
+            <span class="policy-badge" style="background:#0A84FF; color:white;">4/6 Ready</span>
+          </div>
+
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px;">
+            <div class="check-item" style="display:flex; gap:10px; align-items:center; opacity:0.5;">
+              <i class="ph-fill ph-check-circle" style="color:#10b981;"></i>
+              <span style="font-size:13px;">Discharge Summary</span>
+            </div>
+            <div class="check-item" style="display:flex; gap:10px; align-items:center; opacity:0.5;">
+              <i class="ph-fill ph-check-circle" style="color:#10b981;"></i>
+              <span style="font-size:13px;">Final Hospital Bill</span>
+            </div>
+            <div class="check-item"
+              style="display:flex; gap:10px; align-items:center; text-decoration:line-through; opacity:1;">
+              <i class="ph-fill ph-check-circle" style="color:#10b981;"></i>
+              <span style="font-size:13px;">Payment Receipts</span>
+            </div>
+            <div class="check-item" style="display:flex; gap:10px; align-items:center;">
+              <i class="ph-bold ph-circle" style="color:#ef4444;"></i>
+              <span style="font-size:13px;">Lab Reports (Missing)</span>
+            </div>
+            <div class="check-item" style="display:flex; gap:10px; align-items:center;">
+              <i class="ph-bold ph-circle" style="color:#ef4444;"></i>
+              <span style="font-size:13px;">Claim Form Part B</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- NEW: Expert Hiring Module -->
+        <div class="module-card" style="border:1px solid rgba(245, 158, 11, 0.3);">
+          <div class="section-header" style="color:#f59e0b;">
+            <div class="blue-dot" style="background:#f59e0b; box-shadow:0 0 10px #f59e0b;"></div> Claim Recovery Expert
+          </div>
+          <p style="font-size:13px; color:var(--text-muted); margin-bottom:20px;">
+            Is your claim <strong>Rejected</strong> or <strong>Denied</strong>? Hire our expert panel (Doctors +
+            Insurance Lawyers) to fight your case.
+            We first check feasibility. If recovery chance is < 40%, we wont take the case. </p>
+
+              <div id="expert-panel-ui">
+                <div style="display:flex; gap:16px; align-items:flex-end;">
+                  <div class="form-group" style="flex:1; margin:0;">
+                    <label class="form-label">Rejection Reason</label>
+                    <select class="form-select" id="rejectReason">
+                      <option value="none">Select Reason...</option>
+                      <option value="ped">Pre-Existing Disease (PED)</option>
+                      <option value="non-disclosure">Non-Disclosure of Facts</option>
+                      <option value="unnecessary">Unnecessary Hospitalization</option>
+                      <option value="limit">Sum Insured Exhausted</option>
+                    </select>
+                  </div>
+                  <button class="cta-btn" style="width:auto; background:#f59e0b; color:black;"
+                    onclick="assessRecovery()">
+                    <i class="ph-bold ph-gavel"></i> Check Feasibility
+                  </button>
+                </div>
+              </div>
+
+              <!-- Dynamic Result Area -->
+              <div id="recovery-result"
+                style="margin-top:20px; display:none; background:rgba(0,0,0,0.3); padding:16px; border-radius:12px;">
+                <!-- Injected by JS -->
+              </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/patient-os.js"></script>
+  <script src="js/localization.js"></script>
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      html.setAttribute('data-theme', html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    }
+
+    // --- 1. COVERAGE ANALYSIS LOGIC ---
+    function analyzeCover() {
+      const btn = document.querySelector('.cta-btn');
+      const res = document.getElementById('cover-result');
+      const amt = document.getElementById('estInput').value;
+      const payoutEl = document.getElementById('payoutVal');
+
+      if (!amt) return;
+
+      btn.innerHTML = `<i class="ph-bold ph-spinner" style="animation:spin 1s infinite linear"></i> Analyzing Policy...`;
+
+      setTimeout(() => {
+        btn.innerHTML = `<i class="ph-bold ph-calculator"></i> Validate Coverage`;
+        res.style.display = 'block';
+
+        const val = parseInt(amt);
+        // Logic: 10% deduction + 2% consumables
+        const deduction = val * 0.12;
+        const payout = val - deduction;
+
+        payoutEl.innerText = '₹' + payout.toLocaleString();
+      }, 1500);
+    }
+
+    // --- 2. BILL AUDIT LOGIC ---
+    function runAudit() {
+      const res = document.getElementById('audit-result');
+      res.style.display = 'none';
+
+      // Simulating upload & scan
+      const btn = document.querySelector('button[onclick*="fileUpload"]');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = `<i class="ph-bold ph-spinner" style="animation:spin 1s infinite linear"></i> Scanning...`;
+
+      setTimeout(() => {
+        btn.innerHTML = `<i class="ph-bold ph-check"></i> Uploaded`;
+        res.style.display = 'block';
+      }, 2000);
+    }
+
+    // --- 3. RECOVERY EXPERT LOGIC ---
+    function assessRecovery() {
+      const reason = document.getElementById('rejectReason').value;
+      const resBox = document.getElementById('recovery-result');
+
+      if (reason === 'none') {
+        alert("Please select a rejection reason.");
+        return;
+      }
+
+      resBox.style.display = 'block';
+      resBox.innerHTML = `<div style="text-align:center; color:var(--text-muted);"><i class="ph-bold ph-spinner" style="animation:spin 1s infinite linear"></i> AI Lawyer analyzing case precedents...</div>`;
+
+      setTimeout(() => {
+        let chance = 0;
+        let msg = "";
+        let color = "";
+        let canHire = false;
+
+        if (reason === 'ped') {
+          chance = 85;
+          msg = "Strong Case: Moratorium period of 3 years completed. PED denial is invalid.";
+          color = "#10b981";
+          canHire = true;
+        } else if (reason === 'non-disclosure') {
+          chance = 20;
+          msg = "Weak Case: Material facts were omitted in proposal form. Recovery unlikely.";
+          color = "#ef4444";
+          canHire = false;
+        } else if (reason === 'unnecessary') {
+          chance = 65;
+          msg = "Moderate Case: Doctor's justification note is strong. Requires Ombudsman appeal.";
+          color = "#f59e0b";
+          canHire = true;
+        } else {
+          chance = 10;
+          msg = "Critical: Sum insured limit is absolute. Cannot recover more than limit.";
+          color = "#ef4444";
+          canHire = false;
+        }
+
+        let hireHtml = canHire ?
+          `<button class="cta-btn" style="background:#f59e0b; color:black; margin-top:12px;">Hire Expert Team (₹999)</button>` :
+          `<button class="cta-btn" disabled style="background:var(--glass-border); color:var(--text-muted); margin-top:12px; cursor:not-allowed;">Case Rejected by HealthFlo</button>`;
+
+        resBox.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <span style="font-size:12px; font-weight:700; color:var(--text-muted);">RECOVERY CHANCE</span>
+                    <span style="font-size:18px; font-weight:800; color:${color};">${chance}%</span>
+                </div>
+                <div style="width:100%; height:6px; background:rgba(255,255,255,0.1); border-radius:10px; margin-bottom:12px;">
+                    <div style="width:${chance}%; height:100%; background:${color}; border-radius:10px;"></div>
+                </div>
+                <p style="font-size:13px; color:var(--text-main); line-height:1.4;">${msg}</p>
+                ${hireHtml}
+            `;
+
+      }, 2000);
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>HealthFlo - Devices & Vitals</title>
+
+  <!-- Icons & Fonts -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <!-- Connection Styles -->
+  <link rel="stylesheet" href="css/patient-connections.css" />
+
+  <style>
+    /* --- CORE THEME VARIABLES (From Dashboard) --- */
+    :root {
+      --bg-radial: radial-gradient(circle at 20% 30%, #506176 0%, #1a1f2b 55%, #0E121B 100%);
+      --glass-bg: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-blur: blur(24px);
+      --text-main: #ffffff;
+      --text-muted: #94a3b8;
+      --color-blue: #0A84FF;
+
+      /* Overriding Device CSS Variables to match Dashboard Theme */
+      --bg-soft: rgba(22, 28, 38, 0.6);
+      --bg-glass: rgba(255, 255, 255, 0.03);
+      --border: 1px solid rgba(255, 255, 255, 0.08);
+      --card-radius: 20px;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      --grid-gap: 20px;
+      --muted: #94a3b8;
+      --text: #ffffff;
+
+      --sidebar-bg: rgba(255, 255, 255, 0.02);
+      --browser-bar-bg: rgba(0, 0, 0, 0.2);
+      --divider-color: rgba(255, 255, 255, 0.05);
+    }
+
+    /* --- DASHBOARD SHELL STYLES --- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', 'Plus Jakarta Sans', sans-serif;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(100, 100, 100, 0.2);
+      border-radius: 10px;
+    }
+
+    body {
+      height: 100vh;
+      width: 100vw;
+      background: var(--bg-radial) !important;
+      overflow: hidden;
+      user-select: none;
+      color: var(--text-main);
+      font-family: 'Inter', sans-serif !important;
+    }
+
+    .app-container {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .browser-bar {
+      height: 60px;
+      display: flex;
+      align-items: center;
+      padding: 0 32px;
+      gap: 24px;
+      border-bottom: 1px solid var(--glass-border);
+      background: var(--browser-bar-bg);
+      backdrop-filter: blur(10px);
+      z-index: 20;
+      flex-shrink: 0;
+    }
+
+    .window-controls {
+      display: flex;
+      gap: 8px;
+      margin-right: 12px;
+    }
+
+    .window-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      opacity: 0.8;
+    }
+
+    .branding-right {
+      margin-left: auto;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: 1px;
+      font-size: 14px;
+      opacity: 0.8;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .branding-right span {
+      color: var(--color-blue);
+      text-shadow: 0 0 10px rgba(10, 132, 255, 0.5);
+    }
+
+    .theme-toggle {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--glass-border);
+      border: 1px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-muted);
+      margin-left: 10px;
+    }
+
+    .dashboard-body {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .sidebar {
+      width: 120px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 32px 0;
+      gap: 18px;
+      border-right: 1px solid var(--glass-border);
+      z-index: 10;
+      background: var(--sidebar-bg);
+      backdrop-filter: var(--glass-blur);
+      flex-shrink: 0;
+    }
+
+    .logo {
+      font-weight: 800;
+      color: var(--text-main);
+      font-size: 24px;
+      letter-spacing: -1px;
+      margin-bottom: 12px;
+    }
+
+    .logo span {
+      color: var(--color-blue);
+    }
+
+    .menu-item {
+      width: 90px;
+      height: 74px;
+      border-radius: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: var(--text-muted);
+      font-size: 22px;
+      cursor: pointer;
+      transition: 0.3s;
+      border: 1px solid transparent;
+      text-decoration: none;
+      flex-direction: column;
+      gap: 6px;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .menu-item:hover {
+      color: var(--text-main);
+      background: var(--glass-bg);
+      border-color: var(--glass-border);
+    }
+
+    .menu-item.active {
+      background: var(--glass-border);
+      color: var(--color-blue);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--glass-border);
+    }
+
+    .menu-item.danger {
+      color: #ef4444;
+    }
+
+    .menu-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: inherit;
+      letter-spacing: 0.2px;
+    }
+
+    .sidebar-divider {
+      width: 60%;
+      height: 1px;
+      background: var(--divider-color);
+      margin: 6px auto;
+      opacity: 0.6;
+    }
+
+    .main-content {
+      flex: 1;
+      padding: 30px 40px;
+      overflow-y: auto;
+      position: relative;
+      padding-bottom: 100px;
+      display: block;
+    }
+
+    .header-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 30px;
+      z-index: 5;
+    }
+
+    .page-title h2 {
+      font-size: 18px;
+      color: var(--color-blue);
+      margin-bottom: 5px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .page-title h1 {
+      font-size: 56px;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1;
+      letter-spacing: -2px;
+    }
+
+    .page-title h1 span {
+      font-weight: 300;
+      opacity: 0.8;
+    }
+
+    /* --- Custom connection overrides --- */
+    .hf-topbar,
+    .neo-dock,
+    footer {
+      display: none !important;
+    }
+
+    .chip {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(59, 130, 246, 0.2);
+      color: #60a5fa;
+      margin-bottom: 8px;
+    }
+
+    .badge {
+      padding: 8px 16px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: white;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: 0.2s;
+    }
+
+    .badge.primary {
+      background: var(--color-blue);
+      border-color: var(--color-blue);
+    }
+
+    .badge:hover {
+      opacity: 0.9;
+    }
+
+    .badge.ghost {
+      background: transparent;
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 12px;
+      border-radius: 12px;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat small {
+      display: block;
+      font-size: 10px;
+      opacity: 0.6;
+      margin-bottom: 2px;
+    }
+
+    .stat strong {
+      font-size: 14px;
+      color: var(--color-blue);
+    }
+
+    .stat .hint {
+      display: block;
+      font-size: 10px;
+      opacity: 0.5;
+      margin-top: 2px;
+    }
+
+    .pill {
+      font-size: 10px;
+      padding: 4px 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 6px;
+      margin-right: 4px;
+      display: inline-block;
+      margin-bottom: 4px;
+    }
+
+    @media (max-width: 1200px) {
+      .sidebar {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app-container">
+    <!-- Browser Bar -->
+    <div class="browser-bar">
+      <div class="window-controls">
+        <div class="window-dot" style="background: #ef4444;"></div>
+        <div class="window-dot" style="background: #f59e0b;"></div>
+        <div class="window-dot" style="background: #10b981;"></div>
+      </div>
+      <div class="branding-right">
+        <span data-i18n="app_name">HealthFlo</span>
+        <span data-i18n="subtitle">CLINICAL V3</span>
+      </div>
+
+      <div style="margin-left:auto; display:flex; gap:10px;">
+        <select id="lang-select" onchange="window.setLang(this.value)"
+          style="background:var(--glass-bg); color:var(--text-main); border:1px solid var(--glass-border); padding:6px; border-radius:8px; width:80px;">
+          <option value="en">ENG</option>
+          <option value="ta">தமிழ்</option>
+          <option value="hi">हिंदी</option>
+          <option value="ml">മലയാളം</option>
+          <option value="kn">ಕನ್ನಡ</option>
+          <option value="te">తెలుగు</option>
+        </select>
+        <button class="theme-toggle" onclick="toggleTheme()"><i class="ph-bold ph-sun"></i></button>
+      </div>
+    </div>
+
+    <div class="dashboard-body">
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <div class="logo">H<span>+</span></div>
+        <a class="menu-item" href="patient-dashboard.html">
+          <i class="ph ph-heartbeat"></i>
+          <span class="menu-label" data-i18n="nav_dashboard">Dashboard</span>
+        </a>
+        <a class="menu-item" href="patient-health.html">
+          <i class="ph ph-pulse"></i>
+          <span class="menu-label" data-i18n="nav_health">Health</span>
+        </a>
+        <a class="menu-item" href="patient-organs.html">
+          <i class="ph-bold ph-scan"></i>
+          <span class="menu-label" data-i18n="nav_organs">Organs</span>
+        </a>
+        <a class="menu-item" href="patient-labs.html">
+          <i class="ph ph-flask"></i>
+          <span class="menu-label" data-i18n="nav_labs">Labs</span>
+        </a>
+        <a class="menu-item" href="patient-pharmacy.html">
+          <i class="ph ph-pill"></i>
+          <span class="menu-label" data-i18n="nav_pharmacy">Pharmacy</span>
+        </a>
+        <a class="menu-item" href="patient-hospitals.html">
+          <i class="ph ph-hospital"></i>
+          <span class="menu-label" data-i18n="nav_hospitals">Hospitals</span>
+        </a>
+        <a class="menu-item" href="patient-insurance.html">
+          <i class="ph ph-shield-plus"></i>
+          <span class="menu-label" data-i18n="nav_insurance">Insurance</span>
+        </a>
+        <a class="menu-item active" href="patient-devices.html">
+          <i class="ph-fill ph-watch"></i>
+          <span class="menu-label" data-i18n="nav_devices">Devices</span>
+        </a>
+        <a class="menu-item" href="patient-family.html">
+          <i class="ph ph-users"></i>
+          <span class="menu-label" data-i18n="nav_family">Family</span>
+        </a>
+        <a class="menu-item" href="patient-profile.html">
+          <i class="ph ph-user"></i>
+          <span class="menu-label" data-i18n="nav_profile">Profile</span>
+        </a>
+        <div class="sidebar-divider"></div>
+        <a class="menu-item" href="patient-settings.html">
+          <i class="ph ph-gear-six"></i>
+          <span class="menu-label" data-i18n="nav_settings">Settings</span>
+        </a>
+        <a class="menu-item danger" href="index.html" style="margin-top: auto;">
+          <i class="ph ph-power"></i>
+          <span class="menu-label" data-i18n="nav_exit">Exit</span>
+        </a>
+      </div>
+
+      <!-- Main Content -->
+      <div class="main-content">
+        <div class="header-section">
+          <div class="header-left">
+            <div class="page-title">
+              <h2>Connectivity & Sensors</h2>
+              <h1>Device <span>Management</span></h1>
+            </div>
+          </div>
+        </div>
+
+        <!-- Original Content Wrapped -->
+        <section class="connection-hero">
+          <div class="hero-card">
+            <p class="chip">Wi‑Fi / BLE</p>
+            <h3 class="hero-title" style="margin-top:10px; font-size:24px;">Pair all devices in one place</h3>
+            <p class="section-sub">Live vitals streaming from watches, BP cuffs, and glucometers.</p>
+            <div class="hero-actions" style="margin-top:20px;">
+              <button class="badge primary" id="pairDevice">Scan for devices</button>
+              <button class="badge" id="triggerEmergency">Trigger ambulance</button>
+              <button class="badge" id="autoToggle">Auto trigger: OFF</button>
+            </div>
+            <div class="notice" id="live_location_status" style="margin-top:10px; font-size:11px; opacity:0.6;">Location
+              ready.</div>
+            <div class="notice" id="emg_status_msg" style="margin-top:2px; font-size:11px; opacity:0.6;">Manual mode
+              active.</div>
+          </div>
+          <div class="hero-card stack">
+            <div class="stat-grid" id="device_list">
+              <div class="stat"><small>Watch</small><strong>Neo Band</strong><span class="hint">HR + SpO₂</span></div>
+              <div class="stat"><small>BP cuff</small><strong>Qardio</strong><span class="hint">Synced</span></div>
+              <div class="stat"><small>Glucose</small><strong>Libre 3</strong><span class="hint">Every 8h</span></div>
+            </div>
+            <div class="inline-list" style="margin-top:10px;">
+              <span class="badge soft">OTA updates</span>
+              <span class="badge soft">Battery health</span>
+            </div>
+        </section>
+
+        <!-- NEW: Camera & Room Monitor -->
+        <section class="section" style="margin-top: 30px;">
+          <header style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px;">
+            <div>
+              <p class="chip" style="background: rgba(16, 185, 129, 0.2); color: #10b981;">Hardware</p>
+              <h2 class="section-title">Room Monitor & WiFi Cam</h2>
+            </div>
+            <button class="badge primary"><i class="ph-bold ph-plus"></i> Add Camera</button>
+          </header>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+            <!-- Camera Feed Card -->
+            <div
+              style="background: black; border-radius: 20px; overflow: hidden; position: relative; border: 1px solid var(--border); aspect-ratio: 16/9;">
+              <!-- Simulated Feed Image -->
+              <img src="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=800&q=80"
+                style="width: 100%; height: 100%; object-fit: cover; opacity: 0.6;">
+
+              <!-- Overlays -->
+              <div
+                style="position: absolute; top: 16px; left: 16px; background: rgba(239, 68, 68, 0.8); color: white; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                <div
+                  style="width: 8px; height: 8px; background: white; border-radius: 50%; animation: pulse 1s infinite;">
+                </div> LIVE
+              </div>
+              <div
+                style="position: absolute; top: 16px; right: 16px; font-family: monospace; font-size: 12px; color: rgba(255,255,255,0.7);">
+                CAM-01 • 1080p • 30fps
+              </div>
+              <div
+                style="position: absolute; bottom: 0; left: 0; right: 0; padding: 16px; background: linear-gradient(to top, black, transparent); display: flex; justify-content: space-between; align-items: center;">
+                <span style="color: white; font-weight: 600;">Patient Room (Main)</span>
+                <div style="display: flex; gap: 10px;">
+                  <button
+                    style="background: rgba(255,255,255,0.2); border: none; color: white; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;"><i
+                      class="ph-fill ph-microphone-slash"></i></button>
+                  <button
+                    style="background: rgba(255,255,255,0.2); border: none; color: white; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;"><i
+                      class="ph-fill ph-arrows-out-simple"></i></button>
+                </div>
+              </div>
+            </div>
+
+            <!-- WiFi & Gateway Status -->
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+              <div
+                style="background: var(--bg-soft); padding: 20px; border-radius: 20px; border: var(--border); flex: 1; display: flex; flex-direction: column; justify-content: center;">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                  <div
+                    style="width: 40px; height: 40px; background: rgba(10, 132, 255, 0.2); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--color-blue);">
+                    <i class="ph-bold ph-wifi-high" style="font-size: 20px;"></i>
+                  </div>
+                  <div>
+                    <h4 style="margin: 0; color: var(--text);">HealthFlo Gateway</h4>
+                    <span style="font-size: 12px; color: var(--muted);">Connected • 5GHz</span>
+                  </div>
+                  <div style="margin-left: auto;">
+                    <div
+                      style="width: 10px; height: 10px; background: #10b981; border-radius: 50%; box-shadow: 0 0 10px #10b981;">
+                    </div>
+                  </div>
+                </div>
+                <div
+                  style="background: rgba(0,0,0,0.2); border-radius: 12px; padding: 12px; display: flex; justify-content: space-between; margin-bottom: 10px;">
+                  <span style="font-size: 12px; color: var(--muted);">Signal Strength</span>
+                  <span style="font-size: 12px; color: #10b981; font-weight: 600;">-42 dBm (Excellent)</span>
+                </div>
+                <div
+                  style="background: rgba(0,0,0,0.2); border-radius: 12px; padding: 12px; display: flex; justify-content: space-between;">
+                  <span style="font-size: 12px; color: var(--muted);">Devices Linked</span>
+                  <span style="font-size: 12px; color: var(--text); font-weight: 600;">4 Active</span>
+                </div>
+              </div>
+
+              <div
+                style="background: var(--bg-soft); padding: 20px; border-radius: 20px; border: var(--border); flex: 1;">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                  <i class="ph-fill ph-shield-check" style="font-size: 20px; color: #10b981;"></i>
+                  <h4 style="margin: 0; color: var(--text);">Security Status</h4>
+                </div>
+                <p style="font-size: 12px; color: var(--muted); margin-bottom: 16px;">Camera feed is end-to-end
+                  encrypted. Access log is active.</p>
+                <button class="badge ghost" style="width: 100%;">View Access Logs</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" style="margin-top:30px;">
+          <header>
+            <div>
+              <p class="chip">Pairing desk</p>
+              <h2 class="section-title">Status</h2>
+            </div>
+          </header>
+          <div class="table-card">
+            <table>
+              <thead>
+                <tr>
+                  <th>Device</th>
+                  <th>Status</th>
+                  <th>Signal</th>
+                  <th>Last sync</th>
+                </tr>
+              </thead>
+              <tbody id="device_status_rows">
+                <tr data-device="watch">
+                  <td>Smart watch</td>
+                  <td><span class="chip">Connected</span></td>
+                  <td><span class="chip">Strong</span></td>
+                  <td>2 min ago</td>
+                </tr>
+                <tr data-device="bp">
+                  <td>BP cuff</td>
+                  <td><span class="chip">Connected</span></td>
+                  <td><span class="chip">Strong</span></td>
+                  <td>5 min ago</td>
+                </tr>
+                <tr data-device="glucose">
+                  <td>CGM</td>
+                  <td><span class="chip">Ready</span></td>
+                  <td><span class="chip">Moderate</span></td>
+                  <td>20 min ago</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="section" style="margin-top:30px;">
+          <header>
+            <div>
+              <p class="chip">Automation</p>
+              <h2 class="section-title">Vitals Mirroring</h2>
+            </div>
+            <div class="hero-actions" style="margin-top:10px;">
+              <button class="badge" id="familyMirror" data-state="off">Share live view</button>
+              <button class="badge ghost" id="family_status_msg">Family access paused.</button>
+            </div>
+          </header>
+          <div class="section-grid" style="margin-top:20px;">
+            <div class="device-card">
+              <h3>Live vitals feed</h3>
+              <p class="section-sub">Summaries every 5 seconds.</p>
+              <div class="device-meta"><span class="pill">AES-256</span><span class="pill">Encryption</span></div>
+            </div>
+            <div class="device-card">
+              <h3>Calibration</h3>
+              <p class="section-sub">Auto reminders for cuff calibration.</p>
+              <div class="device-meta"><span class="pill">ETA: 2 days</span></div>
+            </div>
+            <div class="device-card">
+              <h3>Geo triggers</h3>
+              <p class="section-sub">Live location for SOS.</p>
+              <div class="device-meta"><span class="pill">SOS + crash</span></div>
+            </div>
+            <div class="device-card">
+              <h3>Diagnostics</h3>
+              <p class="section-sub">Network health check.</p>
+              <div class="device-meta"><span class="pill">Latency < 80ms</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" style="margin-top:30px;">
+          <header>
+            <div>
+              <p class="chip">Quick Actions</p>
+              <h2 class="section-title">Troubleshoot</h2>
+            </div>
+          </header>
+          <div class="notice-grid" style="margin-top:10px;">
+            <div class="badge ghost">Reboot Bluetooth</div>
+            <div class="badge ghost">Upload Bill</div>
+            <div class="badge ghost">Add Backup Wi-Fi</div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/patient-os.js"></script>
+  <script src="js/localization.js"></script>
+  <script src="js/patient-connections.js"></script>
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      html.setAttribute('data-theme', html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    }
+  </script>
+</body>
+
+</html>

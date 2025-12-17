@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>HealthFlo — Settings</title>
+
+  <!-- Icons & Fonts -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <!-- 3D Engine -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+
+  <style>
+    /* --- CORE THEME VARIABLES --- */
+    :root {
+      /* Default Dark Theme */
+      --bg-radial: radial-gradient(circle at 20% 30%, #506176 0%, #1a1f2b 55%, #0E121B 100%);
+      --glass-bg: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-blur: blur(24px);
+
+      --text-main: #ffffff;
+      --text-muted: #94a3b8;
+      --text-inverse: #000000;
+
+      --color-blue: #0A84FF;
+      --color-yellow: #f59e0b;
+      --color-red: #ef4444;
+      --color-green: #10b981;
+      --color-purple: #8b5cf6;
+
+      --card-bg: rgba(22, 28, 38, 0.6);
+      --card-border: rgba(255, 255, 255, 0.05);
+      --card-active-bg: linear-gradient(135deg, rgba(30, 58, 138, 0.6) 0%, rgba(15, 23, 42, 0.8) 100%);
+
+      --sidebar-bg: rgba(255, 255, 255, 0.02);
+      --browser-bar-bg: rgba(0, 0, 0, 0.2);
+      --divider-color: rgba(255, 255, 255, 0.05);
+
+      --organ-item-bg: rgba(255, 255, 255, 0.01);
+      --organ-item-border: rgba(255, 255, 255, 0.08);
+      --organ-icon-color: #94a3b8;
+
+      --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.3);
+      --glow-color: rgba(10, 132, 255, 0.5);
+    }
+
+    /* --- LIGHT THEME OVERRIDES --- */
+    [data-theme="light"] {
+      /* Clean White/Pastel Background */
+      --bg-radial: linear-gradient(135deg, #f0f4f9 0%, #ffffff 100%);
+
+      /* Text Colors */
+      --text-main: #1e293b;
+      /* Dark Slate */
+      --text-muted: #64748b;
+      /* Cool Grey */
+      --text-inverse: #ffffff;
+
+      /* Pastel Accents - Brighter & Softer */
+      --color-blue: #3b82f6;
+      /* Bright Blue */
+      --color-yellow: #f59e0b;
+      --color-red: #ef4444;
+      --color-green: #10b981;
+      --color-purple: #8b5cf6;
+
+      /* Cards */
+      --card-bg: rgba(255, 255, 255, 0.65);
+      --card-border: rgba(226, 232, 240, 0.8);
+      --card-active-bg: linear-gradient(135deg, #e0f2fe 0%, #ffffff 100%);
+
+      /* UI Elements */
+      --glass-bg: rgba(255, 255, 255, 0.5);
+      --glass-border: rgba(0, 0, 0, 0.06);
+      --glass-blur: blur(24px);
+
+      --sidebar-bg: rgba(255, 255, 255, 0.7);
+      --browser-bar-bg: rgba(255, 255, 255, 0.8);
+      --divider-color: rgba(0, 0, 0, 0.06);
+
+      --organ-item-bg: #ffffff;
+      --organ-item-border: rgba(0, 0, 0, 0.05);
+      --organ-icon-color: #64748b;
+
+      --shadow-soft: 0 10px 30px rgba(148, 163, 184, 0.15);
+      --glow-color: rgba(59, 130, 246, 0.3);
+    }
+
+    /* RESET & SCROLL */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', 'Plus Jakarta Sans', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(100, 100, 100, 0.2);
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(100, 100, 100, 0.3);
+    }
+
+    body {
+      height: 100vh;
+      width: 100vw;
+      background: var(--bg-radial);
+      overflow: hidden;
+      user-select: none;
+      color: var(--text-main);
+    }
+
+    .app-container {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* BROWSER BAR */
+    .browser-bar {
+      height: 60px;
+      display: flex;
+      align-items: center;
+      padding: 0 32px;
+      gap: 24px;
+      border-bottom: 1px solid var(--glass-border);
+      background: var(--browser-bar-bg);
+      backdrop-filter: blur(10px);
+      z-index: 20;
+      flex-shrink: 0;
+    }
+
+    .window-controls {
+      display: flex;
+      gap: 8px;
+      margin-right: 12px;
+    }
+
+    .window-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      opacity: 0.8;
+    }
+
+    .branding-right {
+      margin-left: auto;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: 1px;
+      font-size: 14px;
+      opacity: 0.8;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .branding-right span {
+      color: var(--color-blue);
+      text-shadow: 0 0 10px var(--glow-color);
+    }
+
+    .sync-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 12px;
+      background: rgba(59, 130, 246, 0.12);
+      color: var(--color-blue);
+      font-size: 11px;
+      font-weight: 700;
+      border: 1px solid rgba(59, 130, 246, 0.25);
+      box-shadow: 0 6px 18px rgba(59, 130, 246, 0.15);
+    }
+
+    .sync-pill .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--color-green);
+      box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+      animation: breathe 2.4s ease-in-out infinite;
+    }
+
+    .sync-btn {
+      padding: 8px 16px;
+      background: var(--color-blue);
+      color: white;
+      border-radius: 8px;
+      border: none;
+      font-weight: 600;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: 0.3s;
+      box-shadow: 0 4px 12px var(--glow-color);
+    }
+
+    .sync-btn:hover {
+      filter: brightness(1.1);
+      transform: translateY(-2px);
+    }
+
+    .sync-btn.loading i {
+      animation: spin 1s linear infinite;
+    }
+
+    /* Theme Toggle Button */
+    .theme-toggle {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--glass-border);
+      border: 1px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-muted);
+      margin-left: 10px;
+    }
+
+    .theme-toggle:hover {
+      background: var(--glass-bg);
+      color: var(--text-main);
+    }
+
+    /* BODY LAYOUT */
+    .dashboard-body {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 120px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 32px 0;
+      gap: 18px;
+      border-right: 1px solid var(--glass-border);
+      z-index: 10;
+      background: var(--sidebar-bg);
+      backdrop-filter: var(--glass-blur);
+      flex-shrink: 0;
+    }
+
+    .logo {
+      font-weight: 800;
+      color: var(--text-main);
+      font-size: 24px;
+      letter-spacing: -1px;
+      margin-bottom: 12px;
+    }
+
+    .logo span {
+      color: var(--color-blue);
+    }
+
+    .menu-item {
+      width: 90px;
+      height: 74px;
+      border-radius: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: var(--text-muted);
+      font-size: 22px;
+      cursor: pointer;
+      transition: 0.3s;
+      border: 1px solid transparent;
+      text-decoration: none;
+      flex-direction: column;
+      gap: 6px;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .menu-item:hover {
+      color: var(--text-main);
+      background: var(--glass-bg);
+      border-color: var(--glass-border);
+    }
+
+    .menu-item.active {
+      background: var(--glass-border);
+      color: var(--color-blue);
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--glass-border);
+    }
+
+    .menu-item.danger {
+      color: #ef4444;
+    }
+
+    .menu-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: inherit;
+      letter-spacing: 0.2px;
+    }
+
+    .sidebar-divider {
+      width: 60%;
+      height: 1px;
+      background: var(--divider-color);
+      margin: 6px auto;
+      opacity: 0.6;
+    }
+
+    /* MAIN GRID */
+    .main-content {
+      flex: 1;
+      padding: 30px 40px;
+      /* Default to block/scrollable for non-dashboard pages */
+      overflow-y: auto;
+      position: relative;
+      padding-bottom: 100px;
+    }
+
+    .main-content.grid-layout {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr 340px;
+      grid-template-rows: auto auto auto auto auto 50px;
+      gap: 30px;
+    }
+
+    /* HEADER */
+    .header-section {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 30px;
+      z-index: 5;
+    }
+
+    .header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .top-toggles {
+      display: flex;
+      gap: 10px;
+    }
+
+    .toggle-pill {
+      padding: 8px 24px;
+      border-radius: 100px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      cursor: pointer;
+      transition: 0.3s;
+      backdrop-filter: blur(10px);
+    }
+
+    .toggle-pill.active {
+      background: rgba(10, 132, 255, 0.15);
+      color: var(--color-blue);
+      border-color: rgba(10, 132, 255, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .active-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--color-blue);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--color-blue);
+    }
+
+    .page-title h2 {
+      font-size: 18px;
+      color: var(--color-blue);
+      margin-bottom: 5px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .page-title h1 {
+      font-size: 56px;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1;
+      letter-spacing: -2px;
+    }
+
+    .page-title h1 span {
+      font-weight: 300;
+      opacity: 0.8;
+    }
+
+    .page-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .page-nav a {
+      padding: 8px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--glass-border);
+      color: var(--text-muted);
+      background: var(--glass-bg);
+      font-size: 12px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .page-nav a.active {
+      color: var(--color-blue);
+      border-color: rgba(10, 132, 255, 0.4);
+      box-shadow: 0 6px 14px rgba(10, 132, 255, 0.15);
+    }
+
+    /* DATA CARD GENERIC */
+    .module-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 28px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      backdrop-filter: blur(20px);
+      box-shadow: var(--shadow-soft);
+      margin-bottom: 20px;
+    }
+
+    .section-header {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--color-blue);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .blue-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--color-blue);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--color-blue);
+    }
+
+    /* SETTINGS SPECIFIC */
+    .settings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .setting-item {
+      background: var(--glass-bg);
+      padding: 20px;
+      border-radius: 16px;
+      border: 1px solid var(--glass-border);
+      transition: 0.3s;
+    }
+
+    .setting-item:hover {
+      border-color: var(--color-blue);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .setting-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .setting-head h3 {
+      font-size: 16px;
+      color: var(--text-main);
+      margin: 0;
+    }
+
+    .setting-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+
+    .badge-btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: 0.2s;
+    }
+
+    .badge-btn.primary {
+      background: var(--color-blue);
+      color: white;
+    }
+
+    .badge-btn:hover {
+      filter: brightness(1.1);
+    }
+
+    .badge-btn.secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+      border: 1px solid var(--glass-border);
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .stat-box {
+      background: rgba(0, 0, 0, 0.2);
+      padding: 10px;
+      border-radius: 8px;
+    }
+
+    .stat-box small {
+      display: block;
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .stat-box strong {
+      font-size: 14px;
+      color: var(--text-main);
+    }
+
+    .notice {
+      font-size: 12px;
+      padding: 10px;
+      background: rgba(245, 158, 11, 0.1);
+      color: var(--color-yellow);
+      border-radius: 8px;
+      margin-top: 10px;
+      border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .notice.danger {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--color-red);
+      border-color: rgba(239, 68, 68, 0.2);
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 1200px) {
+      .sidebar {
+        display: none;
+      }
+
+      .main-content {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="app-container">
+    <div class="browser-bar">
+      <div class="window-controls">
+        <div class="window-dot" style="background: #ef4444;"></div>
+        <div class="window-dot" style="background: #f59e0b;"></div>
+        <div class="window-dot" style="background: #10b981;"></div>
+      </div>
+      <div class="branding-right">
+        <span data-i18n="app_name">HealthFlo</span>
+        <span data-i18n="subtitle">CLINICAL V3</span>
+      </div>
+
+      <div class="sync-pill" id="sync-pill">
+        <div class="dot"></div>
+        <div>
+          <div style="font-size:10px; opacity:0.7;">Network Sync</div>
+          <div style="font-size:12px; font-weight:800;" id="sync-status">Live</div>
+        </div>
+      </div>
+
+      <div style="margin-left:auto; display:flex; gap:10px;">
+        <select id="lang-select" onchange="window.setLang(this.value)"
+          style="background:var(--glass-bg); color:var(--text-main); border:1px solid var(--glass-border); padding:6px; border-radius:8px; width:80px;">
+          <option value="en">ENG</option>
+          <option value="ta">தமிழ்</option>
+          <option value="hi">हिंदी</option>
+          <option value="ml">മലയാളം</option>
+          <option value="kn">ಕನ್ನಡ</option>
+          <option value="te">తెలుగు</option>
+        </select>
+        <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" title="Toggle Light/Dark Mode">
+          <i class="ph-bold ph-sun"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="dashboard-body">
+      <div class="sidebar">
+        <div class="logo">H<span>+</span></div>
+        <a class="menu-item" href="patient-dashboard.html">
+          <i class="ph-fill ph-heartbeat"></i>
+          <span class="menu-label" data-i18n="nav_dashboard">Dashboard</span>
+        </a>
+        <a class="menu-item" href="patient-health.html">
+          <i class="ph-bold ph-pulse"></i>
+          <span class="menu-label" data-i18n="nav_health">Health</span>
+        </a>
+        <a class="menu-item" href="patient-organs.html">
+          <i class="ph-bold ph-scan"></i>
+          <span class="menu-label" data-i18n="nav_organs">Organs</span>
+        </a>
+        <a class="menu-item" href="patient-labs.html">
+          <i class="ph ph-flask"></i>
+          <span class="menu-label" data-i18n="nav_labs">Labs</span>
+        </a>
+        <a class="menu-item" href="patient-pharmacy.html">
+          <i class="ph ph-pill"></i>
+          <span class="menu-label" data-i18n="nav_pharmacy">Pharmacy</span>
+        </a>
+        <a class="menu-item" href="patient-hospitals.html">
+          <i class="ph ph-hospital"></i>
+          <span class="menu-label" data-i18n="nav_hospitals">Hospitals</span>
+        </a>
+        <a class="menu-item" href="patient-insurance.html">
+          <i class="ph ph-shield-plus"></i>
+          <span class="menu-label" data-i18n="nav_insurance">Insurance</span>
+        </a>
+        <a class="menu-item" href="patient-devices.html">
+          <i class="ph ph-watch"></i>
+          <span class="menu-label" data-i18n="nav_devices">Devices</span>
+        </a>
+        <a class="menu-item" href="patient-family.html">
+          <i class="ph ph-users"></i>
+          <span class="menu-label" data-i18n="nav_family">Family</span>
+        </a>
+        <a class="menu-item" href="patient-profile.html">
+          <i class="ph ph-user"></i>
+          <span class="menu-label" data-i18n="nav_profile">Profile</span>
+        </a>
+        <div class="sidebar-divider"></div>
+        <a class="menu-item active" href="patient-settings.html">
+          <i class="ph ph-gear-six"></i>
+          <span class="menu-label" data-i18n="nav_settings">Settings</span>
+        </a>
+        <a class="menu-item danger" href="index.html" style="margin-top: auto;">
+          <i class="ph ph-power"></i>
+          <span class="menu-label" data-i18n="nav_exit">Exit</span>
+        </a>
+      </div>
+
+      <div class="main-content">
+
+        <div class="header-section">
+          <div class="header-left">
+            <div class="top-toggles">
+              <div class="toggle-pill active">
+                <div class="active-dot"></div> Secure
+              </div>
+            </div>
+            <div class="page-title">
+              <h2>Configuration & Preferences</h2>
+              <h1>Account <span>Settings</span></h1>
+            </div>
+          </div>
+        </div>
+
+        <!-- Access & QR -->
+        <div class="module-card">
+          <div class="section-header">
+            <div class="blue-dot"></div> Access & Identity
+          </div>
+          <div class="settings-grid">
+            <div class="setting-item">
+              <div class="setting-head">
+                <h3>QR & User ID</h3>
+                <i class="ph-bold ph-qr-code" style="color:var(--color-blue); font-size:24px;"></i>
+              </div>
+              <p class="setting-desc">Use this ID at hospital kiosks, labs, and pharmacy counters for instant data
+                retrieval.</p>
+              <div class="stat-grid">
+                <div class="stat-box"><small>QR Code</small><strong>HF-2048</strong></div>
+                <div class="stat-box"><small>User ID</small><strong>HF-NEO</strong></div>
+              </div>
+            </div>
+            <div class="setting-item">
+              <div class="setting-head">
+                <h3>Session Control</h3>
+                <i class="ph-bold ph-sign-out" style="color:var(--color-red); font-size:24px;"></i>
+              </div>
+              <p class="setting-desc">Manage active sessions across devices. You are currently logged in on Windows PC.
+              </p>
+              <div style="display:flex; gap:10px; margin-top:20px;">
+                <button class="badge-btn secondary">Log out all</button>
+                <button class="badge-btn primary" style="background:var(--color-red);">Log Out</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Security & Contact -->
+        <div class="module-card">
+          <div class="section-header">
+            <div class="blue-dot"></div> Security & Contact
+          </div>
+          <div class="settings-grid">
+            <div class="setting-item">
+              <div class="setting-head">
+                <h3>Contact Details</h3>
+                <i class="ph-bold ph-phone" style="font-size:24px;"></i>
+              </div>
+              <p class="setting-desc">Verified phone number for 2FA and emergency alerts.</p>
+              <div class="stat-box"><small>Verified Mobile</small><strong>+91 90000 00000</strong></div>
+            </div>
+            <div class="setting-item">
+              <div class="setting-head">
+                <h3>Account Deletion</h3>
+                <i class="ph-bold ph-trash" style="color:var(--color-red); font-size:24px;"></i>
+              </div>
+              <p class="setting-desc">Permanently delete your health data after a 30-day recovery window.</p>
+              <div class="notice danger">Request deletion</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- HIPAA Compliance & Audit -->
+        <div class="module-card" style="border-color: rgba(16, 185, 129, 0.3);">
+          <div class="section-header">
+            <div class="blue-dot" style="background:var(--color-green); box-shadow:0 0 10px var(--color-green);"></div>
+            HIPAA Compliance & Audit
+          </div>
+          <div class="settings-grid">
+            <div class="setting-item" style="grid-column: 1 / -1;">
+              <div class="setting-head">
+                <h3>Data Access Log</h3>
+                <span class="badge-btn primary" style="background:#10b981; cursor:default;">HIPAA Compliant</span>
+              </div>
+              <p class="setting-desc">Detailed record of who accessed your medical records.</p>
+
+              <table style="width:100%; border-collapse:collapse; font-size:12px; color:var(--text-muted);">
+                <thead style="text-align:left; border-bottom:1px solid var(--glass-border);">
+                  <tr>
+                    <th style="padding:8px;">User</th>
+                    <th style="padding:8px;">Role</th>
+                    <th style="padding:8px;">Action</th>
+                    <th style="padding:8px;">Time</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style="border-bottom:1px solid var(--glass-border);">
+                    <td style="padding:8px;">Dr. Sarah Smith</td>
+                    <td style="padding:8px;">Cardiologist</td>
+                    <td style="padding:8px;">Viewed ECG</td>
+                    <td style="padding:8px;">Today, 10:45 AM</td>
+                  </tr>
+                  <tr style="border-bottom:1px solid var(--glass-border);">
+                    <td style="padding:8px;">Apollo Pharmacy</td>
+                    <td style="padding:8px;">Vendor</td>
+                    <td style="padding:8px;">Viewed Prescription</td>
+                    <td style="padding:8px;">Today, 09:12 AM</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:8px;">System</td>
+                    <td style="padding:8px;">Admin</td>
+                    <td style="padding:8px;">Cloud Backup</td>
+                    <td style="padding:8px;">Yesterday, 11:00 PM</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="setting-item">
+              <div class="setting-head">
+                <h3>Encryption Status</h3>
+                <i class="ph-bold ph-lock-key" style="color:#10b981; font-size:24px;"></i>
+              </div>
+              <p class="setting-desc">Your data is encrypted at rest and in transit.</p>
+              <div class="stat-grid">
+                <div class="stat-box"><small>Standard</small><strong>AES-256</strong></div>
+                <div class="stat-box"><small>Status</small><strong style="color:#10b981;">Active</strong></div>
+              </div>
+            </div>
+            <div class="setting-item">
+              <div class="setting-head">
+                <h3>Emergency Access</h3>
+                <i class="ph-bold ph-first-aid" style="color:var(--color-red); font-size:24px;"></i>
+              </div>
+              <p class="setting-desc">Allow break-glass access for paramedics in critical SOS states.</p>
+              <label class="switch" style="display:flex; align-items:center; gap:8px;">
+                <input type="checkbox" checked style="accent-color:var(--color-red);">
+                <span style="font-size:13px;">Enabled</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Devices & EMS -->
+        <div class="module-card">
+          <div class="section-header">
+            <div class="blue-dot"></div> Devices & EMS
+          </div>
+          <div class="settings-grid">
+            <div class="setting-item">
+              <div class="setting-head">
+                <h3>Pair Medical Devices</h3>
+                <i class="ph-bold ph-bluetooth" style="color:var(--color-blue); font-size:24px;"></i>
+              </div>
+              <p class="setting-desc">Connect BLE monitors to stream live vitals to your dashboard.</p>
+              <button class="badge-btn primary" id="pairDevice">Scan for Devices</button>
+              <div id="device_list" style="margin-top:10px;"></div>
+            </div>
+            <div class="setting-item">
+              <div class="setting-head">
+                <h3>Ambulance Automation</h3>
+                <i class="ph-bold ph-siren" style="color:var(--color-red); font-size:24px;"></i>
+              </div>
+              <p class="setting-desc">Automatically trigger EMS dispatch if heart rate or vitals go critical.</p>
+              <div style="display:flex; gap:10px;">
+                <button class="badge-btn primary" style="background:#ef4444;" id="triggerEmergency">Trigger Now</button>
+                <button class="badge-btn secondary" id="autoToggle">Auto: OFF</button>
+              </div>
+              <div class="notice" id="emg_status_msg"
+                style="background:rgba(255,255,255,0.05); color:var(--text-muted); border-color:var(--glass-border);">
+                Manual mode active</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="js/patient-os.js"></script>
+  <script src="js/localization.js"></script>
+  <script>
+    // Simple Theme Toggle Logic shared across pages
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+
+      const btn = document.getElementById('theme-btn');
+      if (next === 'light') {
+        btn.innerHTML = '<i class="ph-bold ph-moon"></i>';
+      } else {
+        btn.innerHTML = '<i class="ph-bold ph-sun"></i>';
+      }
+    }
+  </script>
+</body>
+
+</html>
